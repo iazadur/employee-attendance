@@ -11,10 +11,12 @@ System-এ কারা কারা involve এবং তারা কী ক�
 ### Use Case Diagram-এ রয়েছে:
 
 **Actors (অভিনেতা):**
+
 - **Employee** — কর্মচারী (বাম পাশে)
 - **Admin** — প্রশাসক (ডান পাশে)
 
 **Use Cases (কাজ/ফিচার):**
+
 - **Login** — লগইন (উভয় actor এর জন্য প্রয়োজন)
 - **Logout** — লগআউট
 - **Check In** — অফিসে প্রবেশ রেজিস্টার করা
@@ -32,6 +34,7 @@ System-এ কারা কারা involve এবং তারা কী ক�
 সবকিছু একটা বক্সের ভেতর থাকে যার নাম "Employee Attendance System" — এটা সিস্টেমের সীমানা নির্দেশ করে।
 
 **Relationships:**
+
 - সাধারণ লাইন = Actor থেকে use case এ যাওয়া (সরাসরি সম্পর্ক)
 - ড্যাশড লাইন with `<<include>>` = একটা use case অন্যটা এর ভেতরে অন্তর্ভুক্ত (e.g., Approve/Reject Leave-এ Leave Request Review করা আছে)
 
@@ -43,16 +46,16 @@ System-এর classes, attributes, methods, এবং তাদের মধ্�
 
 ### Class Diagram-এ রয়েছে:
 
-| ক্লাস | ভূমিকা | Key Attributes | Key Methods |
-|---|---|---|---|
-| **Person** (Abstract) | Employee এবং Admin-এর parent class | person_id, name, email, password_hash, role | login(), logout() |
-| **Employee** | কর্মচারী যে check-in/out করে এবং ছুটির আবেদন করে | employee_id, department, designation, salary | checkIn(), checkOut(), submitLeaveRequest(), viewAttendance() |
-| **Admin** | প্রশাসক যে সবকিছু manage করে | admin_id, privilege_level | manageEmployees(), approveLeave(), generateReport(), viewAllAttendance() |
-| **Attendance** | প্রতিদিনের হাজিরার রেকর্ড | attendance_id, date, check_in_time, check_out_time, status, work_hours | calculateWorkHours(), getStatus() |
-| **LeaveRequest** | ছুটির আবেদন এবং এর স্ট্যাটাস | leave_id, start_date, end_date, reason, status, applied_date | submitRequest(), updateStatus() |
-| **Report** | attendance report generate করার জন্য | report_id, month, year, generated_by, generated_date | generateMonthlyReport(), generateDailyReport() |
-| **Notification** | কর্মচারীকে alert পাঠানো | notification_id, message, employee_id, sent_date, is_read | sendNotification(), markAsRead() |
-| **Shift** | কর্মঘণ্টার সময়সূচী | shift_id, shift_name, start_time, end_time | getShiftHours() |
+| ক্লাস                 | ভূমিকা                                           | Key Attributes                                                         | Key Methods                                                              |
+| --------------------- | ------------------------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Person** (Abstract) | Employee এবং Admin-এর parent class               | person_id, name, email, password_hash, role                            | login(), logout()                                                        |
+| **Employee**          | কর্মচারী যে check-in/out করে এবং ছুটির আবেদন করে | employee_id, department, designation, salary                           | checkIn(), checkOut(), submitLeaveRequest(), viewAttendance()            |
+| **Admin**             | প্রশাসক যে সবকিছু manage করে                     | admin_id, privilege_level                                              | manageEmployees(), approveLeave(), generateReport(), viewAllAttendance() |
+| **Attendance**        | প্রতিদিনের হাজিরার রেকর্ড                        | attendance_id, date, check_in_time, check_out_time, status, work_hours | calculateWorkHours(), getStatus()                                        |
+| **LeaveRequest**      | ছুটির আবেদন এবং এর স্ট্যাটাস                     | leave_id, start_date, end_date, reason, status, applied_date           | submitRequest(), updateStatus()                                          |
+| **Report**            | attendance report generate করার জন্য             | report_id, month, year, generated_by, generated_date                   | generateMonthlyReport(), generateDailyReport()                           |
+| **Notification**      | কর্মচারীকে alert পাঠানো                          | notification_id, message, employee_id, sent_date, is_read              | sendNotification(), markAsRead()                                         |
+| **Shift**             | কর্মঘণ্টার সময়সূচী                              | shift_id, shift_name, start_time, end_time                             | getShiftHours()                                                          |
 
 ### Relationships (সম্পর্ক):
 
@@ -85,6 +88,7 @@ System-এর classes, attributes, methods, এবং তাদের মধ্�
 ## স্ট্যান্ডার্ড চেকলিস্ট
 
 ### Use Case Diagram Standard Compliance:
+
 - ✅ Actors আছে system boundary এর বাইরে
 - ✅ Use Cases ellipse shape এ
 - ✅ System boundary labeled ("Employee Attendance System")
@@ -92,8 +96,9 @@ System-এর classes, attributes, methods, এবং তাদের মধ্�
 - ✅ Include relationships marked with <<include>> label
 
 ### Class Diagram Standard Compliance:
+
 - ✅ 8টি classes carefully designed
 - ✅ Inheritance relationships with arrows pointing up
 - ✅ Attributes এবং methods স্পষ্টভাবে listed
-- ✅ Multiplicity indicators (1, *, many)
+- ✅ Multiplicity indicators (1, \*, many)
 - ✅ Abstract class (Person) marked
