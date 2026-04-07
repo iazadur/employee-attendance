@@ -1,37 +1,69 @@
-Employee Attendance System এর জন্য দুটো ডায়াগ্রাম বানিয়ে দিচ্ছি — Use Case Diagram আর Class Diagram। চলো শুরু করি।
+# Employee Attendance System (University Project)
 
----
+Tech stack:
+- **Frontend**: Next.js + TailwindCSS + shadcn UI + Redux Toolkit Query
+- **Backend**: NestJS + Prisma
+- **Database**: PostgreSQL (via Docker Compose)
 
-## Use Case Diagram
+## Quick Start (Local)
 
-System-এ কারা কারা involve এবং তারা কী কী করতে পারে সেটা দেখাচ্ছে।---
+### 1) Start PostgreSQL
 
-## Class Diagram
+From repo root:
 
-এখন system-এর classes, attributes, methods, এবং relationships দেখানো হচ্ছে।---
+```bash
+docker compose up -d
+```
 
-## Summary (Assignment-এর জন্য)
+### 2) Backend (NestJS)
 
-**Use Case Diagram-এ রয়েছে:**
-- তিনটি Actor — Employee, Admin, System
-- সাতটি Use Case — Mark Attendance, View Attendance, Apply Leave, Generate Report, Manage Employees, Approve/Reject Leave, Send Notification
-- `«include»` relationship — Leave approve ও Mark Attendance হলে notification যায়
+```bash
+cd backend
+npm install
+npx prisma migrate dev
+npx prisma generate
+npm run db:seed
+npm run start:dev
+```
 
+Backend runs on `http://localhost:3001` (configured in `backend/.env`).
 
+### 3) Frontend (Next.js)
 
-**Class Diagram-এ রয়েছে:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-| Class | ভূমিকা |
-|---|---|
-| `Person` (abstract) | Employee ও Admin-এর parent class |
-| `Employee` | Check-in/out, leave apply করে |
-| `Admin` | Employee manage করে, report বানায় |
-| `Attendance` | প্রতিদিনের হাজিরার রেকর্ড |
-| `LeaveRequest` | ছুটির আবেদন ও status |
-| `Report` | Attendance report generate করে |
-| `Notification` | Alert পাঠায় employee-কে |
-| `Shift` | কর্মঘণ্টা schedule |
+Frontend runs on `http://localhost:3000`.
 
-**Relationships:** Inheritance (Person → Employee/Admin), Composition (Employee → Attendance/Leave), Dependency (Admin → Report/Approve)
+## Default Credentials (Dev)
 
-Lab report এবং presentation-এর জন্য আরও কী লাগবে বলো — sequence diagram, ER diagram, বা project structure দিতে পারি।
+These come from `backend/.env`:
+- **Admin email**: `SEED_ADMIN_EMAIL`
+- **Admin password**: `SEED_ADMIN_PASSWORD`
+
+You can change them and rerun:
+
+```bash
+cd backend
+npm run db:seed
+```
+
+## Modules Implemented
+
+- **Auth**: cookie-based JWT (`/auth/login`, `/auth/logout`, `/auth/me`)
+- **Users**: `/users/me`, admin-only `/users`
+- **Employees** (admin): CRUD + deactivate
+- **Shifts** (admin): CRUD
+- **Attendance** (employee): check-in/out + list
+- **Leave**: employee request + list; admin approve/reject
+- **Reports**: today KPI summary
+
+## Diagrams & SRS
+
+See the `docs/` folder for:
+- Use case diagrams
+- Class diagrams
+- SRS files
