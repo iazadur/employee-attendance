@@ -34,9 +34,11 @@ function isLeaveType(v: string): v is LeaveType {
 
 export default function LeavePage() {
   const me = useMeQuery();
+  const role = me.data?.user.role;
+  const canReview = role === "ADMIN" || role === "MANAGER";
   const myLeave = useMyLeaveQuery();
   const allLeave = useListAllLeavesQuery(undefined, {
-    skip: me.data?.user.role !== "ADMIN",
+    skip: !canReview,
   });
   const [createLeave, createState] = useCreateLeaveMutation();
   const [reviewLeave, reviewState] = useReviewLeaveMutation();
@@ -52,9 +54,9 @@ export default function LeavePage() {
   const [reason, setReason] = useState("");
 
   const rows = useMemo(() => {
-    if (me.data?.user.role === "ADMIN") return allLeave.data ?? [];
+    if (canReview) return allLeave.data ?? [];
     return myLeave.data ?? [];
-  }, [me.data?.user.role, allLeave.data, myLeave.data]);
+  }, [canReview, allLeave.data, myLeave.data]);
 
   return (
     <div className="space-y-6">
@@ -62,13 +64,13 @@ export default function LeavePage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Leave</h1>
           <p className="text-sm text-muted-foreground">
-            {me.data?.user.role === "ADMIN"
+            {canReview
               ? "Review leave requests"
               : "Request and track leave"}
           </p>
         </div>
 
-        {me.data?.user.role !== "ADMIN" ? (
+        {!canReview ? (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger render={<Button />}>Request leave</DialogTrigger>
             <DialogContent>
@@ -146,7 +148,7 @@ export default function LeavePage() {
               <TableHead>To</TableHead>
               <TableHead>Days</TableHead>
               <TableHead>Status</TableHead>
-              {me.data?.user.role === "ADMIN" ? (
+              {canReview ? (
                 <TableHead className="text-right">Action</TableHead>
               ) : null}
             </TableRow>
@@ -164,16 +166,20 @@ export default function LeavePage() {
                       {r.status}
                     </Badge>
                   </TableCell>
-                  {me.data?.user.role === "ADMIN" ? (
+                  {canReview ? (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
                           disabled={reviewState.isLoading}
                           onClick={async () => {
-                            await reviewLeave({ id: r.id, status: "APPROVED" }).unwrap();
-                            toast.success("Approved");
-                            allLeave.refetch();
+                            try {
+                              await reviewLeave({ id: r.id, status: "APPROVED" }).unwrap();
+                              toast.success("Approved");
+                              allLeave.refetch();
+                            } catch {
+                              toast.error("Failed to approve");
+                            }
                           }}
                         >
                           Approve
@@ -183,9 +189,13 @@ export default function LeavePage() {
                           variant="outline"
                           disabled={reviewState.isLoading}
                           onClick={async () => {
-                            await reviewLeave({ id: r.id, status: "REJECTED" }).unwrap();
-                            toast.success("Rejected");
-                            allLeave.refetch();
+                            try {
+                              await reviewLeave({ id: r.id, status: "REJECTED" }).unwrap();
+                              toast.success("Rejected");
+                              allLeave.refetch();
+                            } catch {
+                              toast.error("Failed to reject");
+                            }
                           }}
                         >
                           Reject
@@ -197,7 +207,7 @@ export default function LeavePage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={me.data?.user.role === "ADMIN" ? 6 : 5} className="py-10 text-center text-sm">
+                <TableCell colSpan={canReview ? 6 : 5} className="py-10 text-center text-sm">
                   {myLeave.isLoading || allLeave.isLoading ? "Loading..." : "No leave requests"}
                 </TableCell>
               </TableRow>

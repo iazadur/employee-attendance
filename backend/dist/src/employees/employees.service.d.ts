@@ -13,8 +13,8 @@ export declare class EmployeesService {
         shiftId?: string;
     }): Promise<{
         id: string;
-        email: string;
         name: string;
+        email: string;
         role: import("@prisma/client").$Enums.UserRole;
         employee: {
             id: string;
@@ -26,8 +26,8 @@ export declare class EmployeesService {
             joinDate: Date;
             phone: string;
             profilePhoto: string | null;
-            shiftId: string | null;
             userId: string;
+            shiftId: string | null;
         } | null;
     }>;
     listEmployees(params: {
@@ -36,18 +36,18 @@ export declare class EmployeesService {
         take?: number;
     }): Promise<{
         items: ({
-            user: {
-                id: string;
-                email: string;
-                name: string;
-                role: import("@prisma/client").$Enums.UserRole;
-            };
             shift: {
                 id: string;
                 name: string;
                 startTime: string;
                 endTime: string;
             } | null;
+            user: {
+                id: string;
+                name: string;
+                email: string;
+                role: import("@prisma/client").$Enums.UserRole;
+            };
         } & {
             id: string;
             createdAt: Date;
@@ -58,31 +58,31 @@ export declare class EmployeesService {
             joinDate: Date;
             phone: string;
             profilePhoto: string | null;
-            shiftId: string | null;
             userId: string;
+            shiftId: string | null;
         })[];
         total: number;
         skip: number;
         take: number;
     }>;
     getEmployee(id: string): Promise<{
-        user: {
-            id: string;
-            email: string;
-            name: string;
-            role: import("@prisma/client").$Enums.UserRole;
-        };
         shift: {
             id: string;
             name: string;
-            createdAt: Date;
-            updatedAt: Date;
             startTime: string;
             endTime: string;
             workingDays: string;
             graceMinutes: number;
             description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
         } | null;
+        user: {
+            id: string;
+            name: string;
+            email: string;
+            role: import("@prisma/client").$Enums.UserRole;
+        };
     } & {
         id: string;
         createdAt: Date;
@@ -93,27 +93,27 @@ export declare class EmployeesService {
         joinDate: Date;
         phone: string;
         profilePhoto: string | null;
-        shiftId: string | null;
         userId: string;
+        shiftId: string | null;
     }>;
     updateEmployee(id: string, input: any): Promise<{
-        user: {
-            id: string;
-            email: string;
-            name: string;
-            role: import("@prisma/client").$Enums.UserRole;
-        };
         shift: {
             id: string;
             name: string;
-            createdAt: Date;
-            updatedAt: Date;
             startTime: string;
             endTime: string;
             workingDays: string;
             graceMinutes: number;
             description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
         } | null;
+        user: {
+            id: string;
+            name: string;
+            email: string;
+            role: import("@prisma/client").$Enums.UserRole;
+        };
     } & {
         id: string;
         createdAt: Date;
@@ -124,8 +124,8 @@ export declare class EmployeesService {
         joinDate: Date;
         phone: string;
         profilePhoto: string | null;
-        shiftId: string | null;
         userId: string;
+        shiftId: string | null;
     }>;
     deactivateEmployee(id: string): Promise<{
         ok: boolean;

@@ -8,9 +8,9 @@ export declare class AttendanceService {
     private minutesSinceStartOfDayUtc;
     checkIn(userId: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.AttendanceStatus;
         createdAt: Date;
         updatedAt: Date;
+        status: import("@prisma/client").$Enums.AttendanceStatus;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -22,9 +22,9 @@ export declare class AttendanceService {
     }>;
     checkOut(userId: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.AttendanceStatus;
         createdAt: Date;
         updatedAt: Date;
+        status: import("@prisma/client").$Enums.AttendanceStatus;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -44,9 +44,9 @@ export declare class AttendanceService {
         dateTo?: string;
     }): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.AttendanceStatus;
         createdAt: Date;
         updatedAt: Date;
+        status: import("@prisma/client").$Enums.AttendanceStatus;
         employeeId: string;
         date: Date;
         checkIn: Date | null;

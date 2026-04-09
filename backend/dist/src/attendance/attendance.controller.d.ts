@@ -6,9 +6,9 @@ export declare class AttendanceController {
     constructor(attendance: AttendanceService);
     checkIn(req: Request): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.AttendanceStatus;
         createdAt: Date;
         updatedAt: Date;
+        status: import("@prisma/client").$Enums.AttendanceStatus;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -20,9 +20,9 @@ export declare class AttendanceController {
     }>;
     checkOut(req: Request): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.AttendanceStatus;
         createdAt: Date;
         updatedAt: Date;
+        status: import("@prisma/client").$Enums.AttendanceStatus;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -34,9 +34,9 @@ export declare class AttendanceController {
     }>;
     list(req: Request, query: AttendanceQueryDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.AttendanceStatus;
         createdAt: Date;
         updatedAt: Date;
+        status: import("@prisma/client").$Enums.AttendanceStatus;
         employeeId: string;
         date: Date;
         checkIn: Date | null;

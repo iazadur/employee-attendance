@@ -123,13 +123,18 @@ export class AttendanceService {
       params.requester.role === UserRole.ADMIN ||
       params.requester.role === UserRole.MANAGER;
 
-    const employeeId = isAdminOrManager
-      ? params.employeeId
-      : requesterEmployee?.id;
+    const where: any = {};
 
-    if (!employeeId) throw new BadRequestException('employeeId is required');
-
-    const where: any = { employeeId };
+    if (isAdminOrManager) {
+      if (params.employeeId) {
+        where.employeeId = params.employeeId;
+      }
+    } else {
+      if (!requesterEmployee?.id) {
+        throw new BadRequestException('Employee profile not found');
+      }
+      where.employeeId = requesterEmployee.id;
+    }
     if (params.dateFrom || params.dateTo) {
       where.date = {};
       if (params.dateFrom) where.date.gte = this.startOfDayUtc(new Date(params.dateFrom));

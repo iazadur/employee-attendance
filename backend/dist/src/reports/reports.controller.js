@@ -31,8 +31,9 @@ let ReportsController = class ReportsController {
         const user = req.user;
         const y = Number(year);
         const m = Number(month);
-        return this.reports.monthlyEmployeeSummary({
-            employeeId: employeeId ?? user.id,
+        return this.reports.monthlyForRequester({
+            requester: user,
+            queryEmployeeId: employeeId,
             year: y,
             month: m,
         });

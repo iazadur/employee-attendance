@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -50,5 +55,40 @@ export class ReportsService {
     );
 
     return { employeeId: params.employeeId, year: params.year, month: params.month, summary };
+  }
+
+  async monthlyForRequester(params: {
+    requester: { id: string; role: UserRole };
+    queryEmployeeId?: string;
+    year: number;
+    month: number;
+  }) {
+    const { requester, queryEmployeeId, year, month } = params;
+
+    if (requester.role === UserRole.EMPLOYEE) {
+      const emp = await this.prisma.employee.findUnique({
+        where: { userId: requester.id },
+      });
+      if (!emp) throw new NotFoundException('Employee profile not found');
+      return this.monthlyEmployeeSummary({ employeeId: emp.id, year, month });
+    }
+
+    if (queryEmployeeId) {
+      return this.monthlyEmployeeSummary({
+        employeeId: queryEmployeeId,
+        year,
+        month,
+      });
+    }
+
+    const emp = await this.prisma.employee.findUnique({
+      where: { userId: requester.id },
+    });
+    if (!emp) {
+      throw new BadRequestException(
+        'employeeId query parameter is required for users without an employee profile',
+      );
+    }
+    return this.monthlyEmployeeSummary({ employeeId: emp.id, year, month });
   }
 }

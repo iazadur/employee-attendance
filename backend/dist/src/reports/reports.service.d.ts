@@ -1,3 +1,4 @@
+import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 export declare class ReportsService {
     private readonly prisma;
@@ -15,6 +16,20 @@ export declare class ReportsService {
     }>;
     monthlyEmployeeSummary(params: {
         employeeId: string;
+        year: number;
+        month: number;
+    }): Promise<{
+        employeeId: string;
+        year: number;
+        month: number;
+        summary: Record<string, number>;
+    }>;
+    monthlyForRequester(params: {
+        requester: {
+            id: string;
+            role: UserRole;
+        };
+        queryEmployeeId?: string;
         year: number;
         month: number;
     }): Promise<{

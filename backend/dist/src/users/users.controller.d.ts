@@ -9,11 +9,11 @@ export declare class UsersController {
     list(skip?: string, take?: string): Promise<{
         items: {
             id: string;
-            email: string;
             name: string;
+            createdAt: Date;
+            email: string;
             role: import("@prisma/client").$Enums.UserRole;
             status: import("@prisma/client").$Enums.UserStatus;
-            createdAt: Date;
         }[];
         total: number;
         skip: number;

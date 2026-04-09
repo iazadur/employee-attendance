@@ -7,10 +7,9 @@ export declare class LeaveController {
     constructor(leave: LeaveService);
     create(req: Request, dto: CreateLeaveRequestDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.LeaveStatus;
         createdAt: Date;
         updatedAt: Date;
-        employeeId: string;
+        status: import("@prisma/client").$Enums.LeaveStatus;
         leaveType: import("@prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
@@ -18,14 +17,14 @@ export declare class LeaveController {
         reason: string;
         adminComment: string | null;
         reviewedAt: Date | null;
+        employeeId: string;
         reviewedById: string | null;
     }>;
     mine(req: Request): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.LeaveStatus;
         createdAt: Date;
         updatedAt: Date;
-        employeeId: string;
+        status: import("@prisma/client").$Enums.LeaveStatus;
         leaveType: import("@prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
@@ -33,13 +32,14 @@ export declare class LeaveController {
         reason: string;
         adminComment: string | null;
         reviewedAt: Date | null;
+        employeeId: string;
         reviewedById: string | null;
     }[]>;
     listAll(req: Request): Promise<({
         employee: {
             user: {
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
@@ -51,15 +51,14 @@ export declare class LeaveController {
             joinDate: Date;
             phone: string;
             profilePhoto: string | null;
-            shiftId: string | null;
             userId: string;
+            shiftId: string | null;
         };
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.LeaveStatus;
         createdAt: Date;
         updatedAt: Date;
-        employeeId: string;
+        status: import("@prisma/client").$Enums.LeaveStatus;
         leaveType: import("@prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
@@ -67,14 +66,14 @@ export declare class LeaveController {
         reason: string;
         adminComment: string | null;
         reviewedAt: Date | null;
+        employeeId: string;
         reviewedById: string | null;
     })[]>;
     review(req: Request, id: string, dto: ReviewLeaveDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.LeaveStatus;
         createdAt: Date;
         updatedAt: Date;
-        employeeId: string;
+        status: import("@prisma/client").$Enums.LeaveStatus;
         leaveType: import("@prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
@@ -82,6 +81,7 @@ export declare class LeaveController {
         reason: string;
         adminComment: string | null;
         reviewedAt: Date | null;
+        employeeId: string;
         reviewedById: string | null;
     }>;
 }

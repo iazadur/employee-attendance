@@ -17,8 +17,14 @@ export const attendanceApi = api.injectEndpoints({
     checkOut: build.mutation<AttendanceRecord, void>({
       query: () => ({ url: "/attendance/check-out", method: "POST" }),
     }),
-    listAttendance: build.query<AttendanceRecord[], void>({
-      query: () => "/attendance",
+    listAttendance: build.query<
+      AttendanceRecord[],
+      { employeeId?: string; dateFrom?: string; dateTo?: string } | void
+    >({
+      query: (params) => ({
+        url: "/attendance",
+        params: params ? params : undefined,
+      }),
     }),
   }),
 });

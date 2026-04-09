@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReportsService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma.service");
 let ReportsService = class ReportsService {
     prisma;
@@ -51,6 +52,31 @@ let ReportsService = class ReportsService {
             return acc;
         }, {});
         return { employeeId: params.employeeId, year: params.year, month: params.month, summary };
+    }
+    async monthlyForRequester(params) {
+        const { requester, queryEmployeeId, year, month } = params;
+        if (requester.role === client_1.UserRole.EMPLOYEE) {
+            const emp = await this.prisma.employee.findUnique({
+                where: { userId: requester.id },
+            });
+            if (!emp)
+                throw new common_1.NotFoundException('Employee profile not found');
+            return this.monthlyEmployeeSummary({ employeeId: emp.id, year, month });
+        }
+        if (queryEmployeeId) {
+            return this.monthlyEmployeeSummary({
+                employeeId: queryEmployeeId,
+                year,
+                month,
+            });
+        }
+        const emp = await this.prisma.employee.findUnique({
+            where: { userId: requester.id },
+        });
+        if (!emp) {
+            throw new common_1.BadRequestException('employeeId query parameter is required for users without an employee profile');
+        }
+        return this.monthlyEmployeeSummary({ employeeId: emp.id, year, month });
     }
 };
 exports.ReportsService = ReportsService;

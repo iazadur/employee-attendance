@@ -107,12 +107,18 @@ let AttendanceService = class AttendanceService {
         });
         const isAdminOrManager = params.requester.role === client_1.UserRole.ADMIN ||
             params.requester.role === client_1.UserRole.MANAGER;
-        const employeeId = isAdminOrManager
-            ? params.employeeId
-            : requesterEmployee?.id;
-        if (!employeeId)
-            throw new common_1.BadRequestException('employeeId is required');
-        const where = { employeeId };
+        const where = {};
+        if (isAdminOrManager) {
+            if (params.employeeId) {
+                where.employeeId = params.employeeId;
+            }
+        }
+        else {
+            if (!requesterEmployee?.id) {
+                throw new common_1.BadRequestException('Employee profile not found');
+            }
+            where.employeeId = requesterEmployee.id;
+        }
         if (params.dateFrom || params.dateTo) {
             where.date = {};
             if (params.dateFrom)

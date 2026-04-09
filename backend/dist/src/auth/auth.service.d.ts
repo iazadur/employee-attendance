@@ -7,13 +7,13 @@ export declare class AuthService {
     constructor(users: UsersService, jwt: JwtService);
     validateUser(email: string, password: string): Promise<{
         id: string;
-        email: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
         passwordHash: string;
         role: import("@prisma/client").$Enums.UserRole;
         status: import("@prisma/client").$Enums.UserStatus;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     signToken(user: {
         id: string;
