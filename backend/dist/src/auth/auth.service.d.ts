@@ -12,8 +12,8 @@ export declare class AuthService {
         updatedAt: Date;
         email: string;
         passwordHash: string;
-        role: import("@prisma/client").$Enums.UserRole;
-        status: import("@prisma/client").$Enums.UserStatus;
+        role: import(".prisma/client").$Enums.UserRole;
+        status: import(".prisma/client").$Enums.UserStatus;
     }>;
     signToken(user: {
         id: string;

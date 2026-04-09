@@ -11,7 +11,7 @@ export declare class AuthController {
             id: string;
             email: string;
             name: string;
-            role: import("@prisma/client").$Enums.UserRole;
+            role: import(".prisma/client").$Enums.UserRole;
         };
     }>;
     logout(res: Response): Promise<{

@@ -12,8 +12,8 @@ export declare class UsersController {
             name: string;
             createdAt: Date;
             email: string;
-            role: import("@prisma/client").$Enums.UserRole;
-            status: import("@prisma/client").$Enums.UserStatus;
+            role: import(".prisma/client").$Enums.UserRole;
+            status: import(".prisma/client").$Enums.UserStatus;
         }[];
         total: number;
         skip: number;

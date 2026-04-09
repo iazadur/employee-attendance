@@ -9,16 +9,8 @@ import {
   LeaveStatus,
 } from '@prisma/client';
 import { hash } from 'bcrypt';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg(
-    new Pool({
-      connectionString: process.env.DATABASE_URL,
-    }),
-  ),
-});
+const prisma = new PrismaClient();
 
 const SEED_PASSWORD = 'Asdf@123';
 

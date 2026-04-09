@@ -15,7 +15,7 @@ export declare class EmployeesService {
         id: string;
         name: string;
         email: string;
-        role: import("@prisma/client").$Enums.UserRole;
+        role: import(".prisma/client").$Enums.UserRole;
         employee: {
             id: string;
             createdAt: Date;
@@ -46,7 +46,7 @@ export declare class EmployeesService {
                 id: string;
                 name: string;
                 email: string;
-                role: import("@prisma/client").$Enums.UserRole;
+                role: import(".prisma/client").$Enums.UserRole;
             };
         } & {
             id: string;
@@ -81,7 +81,7 @@ export declare class EmployeesService {
             id: string;
             name: string;
             email: string;
-            role: import("@prisma/client").$Enums.UserRole;
+            role: import(".prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;
@@ -112,7 +112,7 @@ export declare class EmployeesService {
             id: string;
             name: string;
             email: string;
-            role: import("@prisma/client").$Enums.UserRole;
+            role: import(".prisma/client").$Enums.UserRole;
         };
     } & {
         id: string;

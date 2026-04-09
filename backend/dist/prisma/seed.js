@@ -3,13 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const client_1 = require("@prisma/client");
 const bcrypt_1 = require("bcrypt");
-const adapter_pg_1 = require("@prisma/adapter-pg");
-const pg_1 = require("pg");
-const prisma = new client_1.PrismaClient({
-    adapter: new adapter_pg_1.PrismaPg(new pg_1.Pool({
-        connectionString: process.env.DATABASE_URL,
-    })),
-});
+const prisma = new client_1.PrismaClient();
 const SEED_PASSWORD = 'Asdf@123';
 function startOfDayUtc(d) {
     return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));

@@ -15,8 +15,8 @@ export declare class LeaveService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.LeaveStatus;
-        leaveType: import("@prisma/client").$Enums.LeaveType;
+        status: import(".prisma/client").$Enums.LeaveStatus;
+        leaveType: import(".prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
         totalDays: number;
@@ -30,8 +30,8 @@ export declare class LeaveService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.LeaveStatus;
-        leaveType: import("@prisma/client").$Enums.LeaveType;
+        status: import(".prisma/client").$Enums.LeaveStatus;
+        leaveType: import(".prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
         totalDays: number;
@@ -67,8 +67,8 @@ export declare class LeaveService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.LeaveStatus;
-        leaveType: import("@prisma/client").$Enums.LeaveType;
+        status: import(".prisma/client").$Enums.LeaveStatus;
+        leaveType: import(".prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
         totalDays: number;
@@ -90,8 +90,8 @@ export declare class LeaveService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("@prisma/client").$Enums.LeaveStatus;
-        leaveType: import("@prisma/client").$Enums.LeaveType;
+        status: import(".prisma/client").$Enums.LeaveStatus;
+        leaveType: import(".prisma/client").$Enums.LeaveType;
         startDate: Date;
         endDate: Date;
         totalDays: number;

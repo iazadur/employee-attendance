@@ -1,9 +1,26 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import type { Request, Response, CookieOptions } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+
+type AuthenticatedRequest = Request & {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
+};
 
 @Controller('auth')
 export class AuthController {
@@ -21,31 +38,51 @@ export class AuthController {
     const token = await this.auth.signToken({ id: user.id, role: user.role });
 
     const cookieName = this.config.get<string>('COOKIE_NAME') ?? 'eas_token';
-    const secure = (this.config.get<string>('COOKIE_SECURE') ?? 'false') === 'true';
+    const secure =
+      (this.config.get<string>('COOKIE_SECURE') ?? 'false') === 'true';
+    const sameSiteRaw = (
+      this.config.get<string>('COOKIE_SAME_SITE') ?? 'lax'
+    ).toLowerCase();
+    const sameSite: CookieOptions['sameSite'] =
+      sameSiteRaw === 'strict' || sameSiteRaw === 'none' ? sameSiteRaw : 'lax';
+    const cookieSecure = sameSite === 'none' ? true : secure;
 
     res.cookie(cookieName, token, {
       httpOnly: true,
-      secure,
-      sameSite: 'lax',
+      secure: cookieSecure,
+      sameSite,
       path: '/',
       maxAge: 8 * 60 * 60 * 1000,
     });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
     };
   }
 
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response) {
+  logout(@Res({ passthrough: true }) res: Response) {
     const cookieName = this.config.get<string>('COOKIE_NAME') ?? 'eas_token';
-    res.clearCookie(cookieName, { path: '/' });
+    const secure =
+      (this.config.get<string>('COOKIE_SECURE') ?? 'false') === 'true';
+    const sameSiteRaw = (
+      this.config.get<string>('COOKIE_SAME_SITE') ?? 'lax'
+    ).toLowerCase();
+    const sameSite: CookieOptions['sameSite'] =
+      sameSiteRaw === 'strict' || sameSiteRaw === 'none' ? sameSiteRaw : 'lax';
+    const cookieSecure = sameSite === 'none' ? true : secure;
+    res.clearCookie(cookieName, { path: '/', secure: cookieSecure, sameSite });
     return { ok: true };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async me(@Req() req: Request) {
-    return { user: (req as any).user };
+  me(@Req() req: AuthenticatedRequest) {
+    return { user: req.user };
   }
 }

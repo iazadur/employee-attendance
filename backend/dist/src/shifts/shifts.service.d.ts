@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma.service';
 export declare class ShiftsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    create(input: any): import("@prisma/client").Prisma.Prisma__ShiftClient<{
+    create(input: any): import(".prisma/client").Prisma.Prisma__ShiftClient<{
         id: string;
         name: string;
         startTime: string;
@@ -12,8 +12,8 @@ export declare class ShiftsService {
         description: string | null;
         createdAt: Date;
         updatedAt: Date;
-    }, never, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    list(): import("@prisma/client").Prisma.PrismaPromise<{
+    }, never, import("@prisma/client/runtime/library").DefaultArgs>;
+    list(): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
         name: string;
         startTime: string;
