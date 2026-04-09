@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ShieldCheck } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,11 +11,19 @@ import { useLoginMutation } from "@/store/authApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+  email: z.string().trim().email("Enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -24,6 +33,7 @@ export default function LoginPage() {
   const next = "/dashboard";
   const [login, loginState] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const defaultValues = useMemo<FormValues>(
     () => ({ email: "", password: "" }),
@@ -37,6 +47,7 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: FormValues) {
+    setSubmitError(null);
     try {
       await login({
         email: values.email.trim().toLowerCase(),
@@ -44,105 +55,139 @@ export default function LoginPage() {
       }).unwrap();
       toast.success("Welcome back");
       router.replace(next);
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (error) {
+      let message = "Invalid email or password";
+      if (typeof error === "object" && error !== null && "data" in error) {
+        const data = (error as { data?: { message?: unknown } }).data;
+        if (Array.isArray(data?.message)) {
+          message = data.message.join(", ");
+        } else if (typeof data?.message === "string") {
+          message = data.message;
+        }
+      }
+      setSubmitError(message);
+      toast.error(message);
     }
   }
 
   return (
-    <div className="min-h-[calc(100vh-1px)] w-full bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 md:px-6 md:py-12">
-        <div className="grid w-full items-center gap-10 md:grid-cols-2">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/70 px-3 py-1 text-xs text-muted-foreground shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span>Production-ready attendance dashboard</span>
+    <div className="min-h-screen w-full bg-white">
+      <div className="grid min-h-screen w-full lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="relative hidden overflow-hidden border-r border-border/70 bg-white px-10 py-12 lg:flex lg:flex-col lg:justify-between">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3 py-1 text-xs text-muted-foreground shadow-sm">
+              <ShieldCheck className="size-3.5 text-primary" />
+              Employee Attendance System
             </div>
-            <div className="space-y-2">
-              <h1 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">
-                Sign in to continue
+            <div className="space-y-3">
+              <h1 className="max-w-xl text-balance text-4xl font-semibold tracking-tight text-foreground">
+                Manage attendance with a clean modern workspace
               </h1>
-              <p className="text-pretty text-sm text-muted-foreground md:text-base">
-                Use your company account to manage attendance, leave, shifts and
-                reports in one place.
+              <p className="max-w-lg text-sm text-muted-foreground">
+                Track attendance, leaves, shifts, and reports from a single secure
+                dashboard with role-based access.
               </p>
             </div>
-            <div className="hidden text-xs text-muted-foreground md:block">
-              <p className="font-medium text-foreground">Demo credentials</p>
+          </div>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">Demo credentials</p>
+            <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
               <p>
                 Admin: <span className="font-mono">azad@gmail.com</span> /
                 <span className="font-mono"> Asdf@123</span>
               </p>
             </div>
           </div>
-
-          <Card className="w-full border-border/80 bg-card/80 shadow-lg shadow-black/5">
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">
-                Login to Employee Attendance
+        </section>
+        <section className="flex items-center justify-center px-4 py-10 md:px-6">
+          <Card className="w-full max-w-md border-border/70 bg-card shadow-xl shadow-black/5">
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-xl font-semibold tracking-tight">
+                Sign in to Employee Attendance
               </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Continue with your account to access your dashboard.
+              </p>
             </CardHeader>
             <CardContent>
-              <form
-                className="space-y-4"
-                onSubmit={form.handleSubmit(onSubmit)}
-              >
-                <div className="space-y-2 text-sm">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                    {...form.register("email")}
+              <Form {...form}>
+                <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder="you@company.com"
+                            autoComplete="email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {form.formState.errors.email?.message ? (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.email.message}
-                    </p>
-                  ) : null}
-                </div>
 
-                <div className="space-y-2 text-sm">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      className="pr-16"
-                      {...form.register("password")}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 px-3 text-xs text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword((v) => !v)}
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showPassword ? "text" : "password"}
+                              autoComplete="current-password"
+                              className="pr-16"
+                            />
+                            <button
+                              type="button"
+                              className="absolute inset-y-0 right-0 px-3 text-xs text-muted-foreground hover:text-foreground"
+                              onClick={() => setShowPassword((v) => !v)}
+                            >
+                              {showPassword ? "Hide" : "Show"}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Use your account password to continue.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {submitError ? (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                      {submitError}
+                    </div>
+                  ) : null}
+
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loginState.isLoading || !form.formState.isValid}
+                  >
+                    {loginState.isLoading ? "Signing in..." : "Sign in"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    By signing in you agree to follow your organisation&apos;s
+                    attendance and leave policies.
+                  </p>
+                  <div className="rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground lg:hidden">
+                    Admin demo: <span className="font-mono">azad@gmail.com</span> /
+                    <span className="font-mono"> Asdf@123</span>
                   </div>
-                  {form.formState.errors.password?.message ? (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.password.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loginState.isLoading || !form.formState.isValid}
-                >
-                  {loginState.isLoading ? "Signing in..." : "Sign in"}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  By signing in you agree to follow your organisation&apos;s
-                  attendance and leave policies.
-                </p>
-              </form>
+                </form>
+              </Form>
             </CardContent>
           </Card>
-        </div>
+        </section>
       </div>
     </div>
   );

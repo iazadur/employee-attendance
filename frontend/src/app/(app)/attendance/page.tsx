@@ -30,6 +30,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { AttendanceStatusPie } from "@/components/charts/AttendanceStatusPie";
+import { ChartSectionCard } from "@/components/sections/ChartSectionCard";
+import { PageSectionHeader } from "@/components/sections/PageSectionHeader";
 
 export default function AttendancePage() {
   const me = useMeQuery();
@@ -59,19 +62,21 @@ export default function AttendancePage() {
   );
 
   const allRows = attendance.data ?? [];
+  const statusSummary = allRows.reduce<Record<string, number>>((acc, row) => {
+    acc[row.status] = (acc[row.status] ?? 0) + 1;
+    return acc;
+  }, {});
   const totalPages = Math.max(1, Math.ceil(allRows.length / pageSize));
   const pageRows = allRows.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Attendance</h1>
-          <p className="text-sm text-muted-foreground">
-            {isAdminOrManager ? "Review attendance records" : "Your attendance records"}
-          </p>
-        </div>
-      </div>
+      <PageSectionHeader
+        title="Attendance"
+        description={
+          isAdminOrManager ? "Review attendance records" : "Your attendance records"
+        }
+      />
 
       {isAdminOrManager ? (
         <Card>
@@ -117,6 +122,13 @@ export default function AttendancePage() {
           </CardContent>
         </Card>
       ) : null}
+
+      <ChartSectionCard
+        title="Attendance status chart"
+        description="Visual overview for the selected attendance records"
+      >
+        <AttendanceStatusPie summary={statusSummary} />
+      </ChartSectionCard>
 
       <div className="rounded-xl border">
         <Table>

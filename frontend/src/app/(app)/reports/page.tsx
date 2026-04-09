@@ -6,6 +6,9 @@ import { useListEmployeesQuery } from "@/store/employeesApi";
 import { useMonthlyQuery, useTodayKpisQuery } from "@/store/reportsApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AttendanceStatusPie } from "@/components/charts/AttendanceStatusPie";
+import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
+import { ChartSectionCard } from "@/components/sections/ChartSectionCard";
+import { PageSectionHeader } from "@/components/sections/PageSectionHeader";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -44,15 +47,21 @@ export default function ReportsPage() {
           month,
         },
   );
+  const todayData = [
+    { label: "Present", value: kpis.data?.today.present ?? 0 },
+    { label: "Late", value: kpis.data?.today.late ?? 0 },
+    { label: "Half day", value: kpis.data?.today.halfDay ?? 0 },
+    { label: "Pending leave", value: kpis.data?.pendingLeaves ?? 0 },
+  ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
-        <p className="text-sm text-muted-foreground">
-          {canSeeKpis ? "Team overview and monthly breakdown" : "Monthly breakdown"}
-        </p>
-      </div>
+      <PageSectionHeader
+        title="Reports"
+        description={
+          canSeeKpis ? "Team overview and monthly breakdown" : "Monthly breakdown"
+        }
+      />
 
       {canSeeKpis ? (
         <div className="grid gap-4 md:grid-cols-3">
@@ -81,6 +90,15 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
         </div>
+      ) : null}
+
+      {canSeeKpis ? (
+        <ChartSectionCard
+          title="Today performance trend"
+          description="Team-level attendance indicators for the current day"
+        >
+          <SimpleBarChart data={todayData} />
+        </ChartSectionCard>
       ) : null}
 
       <Card>

@@ -1,6 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { toast } from "sonner";
 import { useMeQuery } from "@/store/authApi";
 import {
@@ -13,8 +16,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Pagination,
@@ -24,6 +34,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { AttendanceStatusPie } from "@/components/charts/AttendanceStatusPie";
+import { ChartSectionCard } from "@/components/sections/ChartSectionCard";
+import { PageSectionHeader } from "@/components/sections/PageSectionHeader";
 
 const leaveTypes = [
   "ANNUAL",
@@ -40,6 +53,20 @@ function isLeaveType(v: string): v is LeaveType {
   return (leaveTypes as readonly string[]).includes(v);
 }
 
+const leaveRequestSchema = z
+  .object({
+    leaveType: z.enum(leaveTypes, { message: "Select leave type" }),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().min(1, "End date is required"),
+    reason: z.string().trim().min(3, "Reason must be at least 3 characters"),
+  })
+  .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
+    message: "End date must be same or after start date",
+    path: ["endDate"],
+  });
+
+type LeaveRequestFormValues = z.infer<typeof leaveRequestSchema>;
+
 export default function LeavePage() {
   const me = useMeQuery();
   const role = me.data?.user.role;
@@ -52,105 +79,193 @@ export default function LeavePage() {
   const [reviewLeave, reviewState] = useReviewLeaveMutation();
 
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<LeaveType>("ANNUAL");
-  const [startDate, setStartDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
-  const [endDate, setEndDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
-  const [reason, setReason] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const leaveForm = useForm<LeaveRequestFormValues>({
+    resolver: zodResolver(leaveRequestSchema),
+    defaultValues: {
+      leaveType: "ANNUAL",
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date().toISOString().slice(0, 10),
+      reason: "",
+    },
+    mode: "onChange",
+  });
 
   const rows = useMemo(() => {
     if (canReview) return allLeave.data ?? [];
     return myLeave.data ?? [];
   }, [canReview, allLeave.data, myLeave.data]);
+  const leaveSummary = rows.reduce<Record<string, number>>((acc, row) => {
+    acc[row.status] = (acc[row.status] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const pageRows = rows.slice((page - 1) * pageSize, page * pageSize);
 
+  function getApiErrorMessage(error: unknown): string {
+    if (typeof error === "object" && error !== null && "data" in error) {
+      const data = (error as { data?: { message?: unknown } }).data;
+      if (Array.isArray(data?.message)) {
+        return data.message.filter((item) => typeof item === "string").join(", ");
+      }
+      if (typeof data?.message === "string") {
+        return data.message;
+      }
+    }
+    return "Failed to submit leave request";
+  }
+
+  async function handleLeaveSubmit(values: LeaveRequestFormValues) {
+    setSubmitError(null);
+    try {
+      await createLeave({
+        leaveType: values.leaveType,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        reason: values.reason.trim(),
+      }).unwrap();
+      toast.success("Leave request submitted");
+      setOpen(false);
+      leaveForm.reset({
+        leaveType: "ANNUAL",
+        startDate: new Date().toISOString().slice(0, 10),
+        endDate: new Date().toISOString().slice(0, 10),
+        reason: "",
+      });
+      myLeave.refetch();
+    } catch (error) {
+      const message = getApiErrorMessage(error);
+      setSubmitError(message);
+      toast.error(message);
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Leave</h1>
-          <p className="text-sm text-muted-foreground">
-            {canReview
-              ? "Review leave requests"
-              : "Request and track leave"}
-          </p>
-        </div>
-
-        {!canReview ? (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger render={<Button />}>Request leave</DialogTrigger>
-            <DialogContent>
+      <PageSectionHeader
+        title="Leave"
+        description={canReview ? "Review leave requests" : "Request and track leave"}
+        action={
+          !canReview ? (
+            <Dialog
+              open={open}
+              onOpenChange={(isOpen) => {
+                setOpen(isOpen);
+                if (!isOpen) {
+                  setSubmitError(null);
+                  leaveForm.clearErrors();
+                }
+              }}
+            >
+              <DialogTrigger render={<Button />}>Request leave</DialogTrigger>
+              <DialogContent>
               <DialogHeader>
                 <DialogTitle>New leave request</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Leave type</Label>
-                  <Select
-                    value={type}
-                    onValueChange={(v) =>
-                      setType(v && isLeaveType(v) ? v : "ANNUAL")
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {leaveTypes.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Start</Label>
-                    <Input value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>End</Label>
-                    <Input value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Reason</Label>
-                  <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason..." />
-                </div>
-                <Button
-                  className="w-full"
-                  disabled={createState.isLoading}
-                  onClick={async () => {
-                    try {
-                      await createLeave({
-                        leaveType: type,
-                        startDate,
-                        endDate,
-                        reason,
-                      }).unwrap();
-                      toast.success("Leave request submitted");
-                      setOpen(false);
-                      myLeave.refetch();
-                    } catch {
-                      toast.error("Failed to submit leave request");
-                    }
-                  }}
+              <Form {...leaveForm}>
+                <form
+                  className="space-y-4"
+                  onSubmit={leaveForm.handleSubmit(handleLeaveSubmit)}
                 >
-                  {createState.isLoading ? "Submitting..." : "Submit request"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        ) : null}
-      </div>
+                  <FormField
+                    control={leaveForm.control}
+                    name="leaveType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Leave type</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={(v) =>
+                              field.onChange(v && isLeaveType(v) ? v : "ANNUAL")
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {leaveTypes.map((t) => (
+                                <SelectItem key={t} value={t}>
+                                  {t}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      control={leaveForm.control}
+                      name="startDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Start</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="date" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={leaveForm.control}
+                      name="endDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>End</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="date" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={leaveForm.control}
+                    name="reason"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Reason</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Reason..." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {submitError ? (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                      {submitError}
+                    </div>
+                  ) : null}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={createState.isLoading || !leaveForm.formState.isValid}
+                  >
+                    {createState.isLoading ? "Submitting..." : "Submit request"}
+                  </Button>
+                </form>
+              </Form>
+              </DialogContent>
+            </Dialog>
+          ) : null
+        }
+      />
+
+      <ChartSectionCard
+        title="Leave request status chart"
+        description="Approval and request distribution for current records"
+      >
+        <AttendanceStatusPie summary={leaveSummary} />
+      </ChartSectionCard>
 
       <div className="rounded-xl border">
         <Table>

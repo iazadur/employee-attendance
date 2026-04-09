@@ -76,11 +76,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       .join("") ?? me.data?.user.email?.[0]?.toUpperCase() ?? "U";
 
   return (
-    <div className="h-dvh bg-background">
-      <div className="mx-auto flex h-dvh w-full max-w-7xl flex-col md:flex-row">
+    <div className="h-dvh w-full bg-white">
+      <div className="flex h-dvh w-full flex-col md:flex-row">
         {/* Desktop sidebar */}
-        <aside className="hidden h-dvh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar/70 p-4 backdrop-blur-md md:flex">
-          <div className="rounded-2xl border border-sidebar-border bg-card/60 px-3 py-3 shadow-sm">
+        <aside className="hidden h-dvh w-[320px] shrink-0 flex-col border-r border-sidebar-border bg-white p-4 md:flex">
+          <div className="rounded-2xl border border-sidebar-border bg-white px-3 py-3 shadow-sm">
             <div className="flex items-center gap-2">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/15">
                 <LayoutDashboard className="size-4" />
@@ -120,7 +120,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       "grid h-8 w-8 place-items-center rounded-lg ring-1 transition-colors",
                       active
                         ? "bg-primary/12 text-primary ring-primary/15"
-                        : "bg-background/40 text-muted-foreground ring-sidebar-border group-hover:text-foreground",
+                        : "bg-white text-muted-foreground ring-sidebar-border group-hover:text-foreground",
                     )}
                   >
                     <Icon className="size-4" />
@@ -135,35 +135,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="mt-auto pt-4">
-            <div className="rounded-2xl border border-sidebar-border bg-card/60 p-3 shadow-sm">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex min-w-0 items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-[0.75rem] font-semibold text-primary ring-1 ring-primary/15">
-                    {initials}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-xs font-medium text-foreground">
-                      {me.data?.user.email}
-                    </div>
-                    {role ? (
-                      <div className="truncate text-[0.65rem] uppercase text-muted-foreground">
-                        {role}
-                      </div>
-                    ) : null}
-                  </div>
+            <div className="rounded-2xl border border-sidebar-border bg-white p-3 shadow-sm">
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-[0.75rem] font-semibold text-primary ring-1 ring-primary/15">
+                  {initials}
                 </div>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  disabled={logoutState.isLoading}
-                  onClick={async () => {
-                    await logout().unwrap();
-                    window.location.href = "/login";
-                  }}
-                >
-                  Logout
-                </Button>
+                <div className="min-w-0">
+                  <div className="truncate text-xs font-medium text-foreground">
+                    {me.data?.user.email}
+                  </div>
+                  {role ? (
+                    <div className="truncate text-[0.65rem] uppercase text-muted-foreground">
+                      {role}
+                    </div>
+                  ) : null}
+                </div>
               </div>
+              <Button
+                variant="outline"
+                className="mt-3 w-full"
+                disabled={logoutState.isLoading}
+                onClick={async () => {
+                  await logout().unwrap();
+                  window.location.href = "/login";
+                }}
+              >
+                {logoutState.isLoading ? "Signing out..." : "Logout"}
+              </Button>
             </div>
           </div>
         </aside>
@@ -171,7 +169,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Right side: top bar + content */}
         <div className="flex h-dvh min-w-0 flex-1 flex-col">
           {/* Top bar */}
-          <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-3 border-b bg-background/80 px-4 backdrop-blur md:px-6">
+          <header className="sticky top-0 sm:hidden z-40 flex h-14 shrink-0 items-center justify-between gap-3 border-b bg-white px-4 md:px-6">
             <div className="flex items-center gap-2 md:hidden">
               <Button
                 variant="ghost"
@@ -185,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 Employee Attendance
               </div>
             </div>
-            <div className="hidden items-center gap-2 md:flex">
+            <div className="hidden items-center gap-2">
               <div className="text-sm font-semibold tracking-tight">
                 Employee Attendance
               </div>
@@ -196,7 +194,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   {initials}
                 </div>
                 <div className="flex flex-col">
-                  <span className="max-w-[10rem] truncate text-[0.8rem] font-medium text-foreground">
+                  <span className="max-w-40 truncate text-[0.8rem] font-medium text-foreground">
                     {me.data?.user.email}
                   </span>
                   {role ? (
@@ -206,24 +204,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   ) : null}
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs"
-                disabled={logoutState.isLoading}
-                onClick={async () => {
-                  await logout().unwrap();
-                  window.location.href = "/login";
-                }}
-              >
-                {logoutState.isLoading ? "Signing out..." : "Logout"}
-              </Button>
             </div>
           </header>
 
           {/* Mobile nav drawer */}
           {mobileOpen && visibleNav.length ? (
-            <nav className="border-b bg-sidebar/90 px-4 pb-3 pt-2 text-sm shadow-sm md:hidden">
+            <nav className="border-b bg-white px-4 pb-3 pt-2 text-sm shadow-sm md:hidden">
               <div className="flex flex-col gap-1">
                 {visibleNav.map((item) => (
                   <Link
@@ -240,6 +226,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </Link>
                 ))}
               </div>
+              <Button
+                variant="outline"
+                className="mt-3 w-full"
+                disabled={logoutState.isLoading}
+                onClick={async () => {
+                  await logout().unwrap();
+                  window.location.href = "/login";
+                }}
+              >
+                {logoutState.isLoading ? "Signing out..." : "Logout"}
+              </Button>
             </nav>
           ) : null}
 
