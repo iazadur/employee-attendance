@@ -6,14 +6,16 @@
 | Field | Details |
 |---|---|
 | **Document Title** | Software Requirements Specification — Employee Attendance System |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Course** | BSc in Computer Science and Engineering (CSE) |
-| **Document Status** | Final Draft |
-| **Prepared By** | [Your Name] |
-| **Student ID** | [Your Student ID] |
-| **Institution** | [Your University Name] |
-| **Department** | Department of Computer Science and Engineering |
-| **Date** | March 2026 |
+| **Document Status** | Final |
+| **Prepared By** | Md Azadur Rahman · Rakib Hossain · Aduri Akter |
+| **Student IDs** | 4478 · 4056 · 4032 |
+| **Roles** | Software Engineering · System Administration · QA Engineer |
+| **Institution** | Department of Computer Science and Engineering |
+| **Date** | April 2026 |
+| **Live System** | http://attendance.azadur.com.bd/ |
+| **Source Code** | https://github.com/iazadur/employee-attendance |
 
 ---
 
@@ -39,8 +41,7 @@
    - 3.4 [Leave Management](#34-leave-management)
    - 3.5 [Shift Management](#35-shift-management)
    - 3.6 [Report Generation](#36-report-generation)
-   - 3.7 [Notification System](#37-notification-system)
-   - 3.8 [Dashboard and Analytics](#38-dashboard-and-analytics)
+   - 3.7 [Dashboard and Analytics](#37-dashboard-and-analytics)
 4. [External Interface Requirements](#4-external-interface-requirements)
    - 4.1 [User Interfaces](#41-user-interfaces)
    - 4.2 [Hardware Interfaces](#42-hardware-interfaces)
@@ -67,7 +68,7 @@
 
 ### 1.1 Purpose
 
-This Software Requirements Specification (SRS) document describes the complete functional and non-functional requirements for the **Employee Attendance System**. The system is designed to automate and digitize the process of tracking employee attendance, managing leaves, generating reports, and notifying stakeholders within an organization.
+This Software Requirements Specification (SRS) document describes the complete functional and non-functional requirements for the **Employee Attendance System (EAS)**. The system automates and digitizes the process of tracking employee attendance, managing leaves, scheduling shifts, generating reports, and providing role-specific dashboards.
 
 This document is intended for:
 - Software developers and engineers responsible for implementation
@@ -77,26 +78,27 @@ This document is intended for:
 
 ### 1.2 Scope
 
-The **Employee Attendance System** is a web-based application that enables organizations to manage employee attendance digitally and efficiently.
+The **Employee Attendance System** is a web-based, full-stack application built with Next.js (frontend) and NestJS (backend), backed by a PostgreSQL database managed through Prisma ORM.
 
 **The system will:**
-- Allow employees to mark their daily attendance (check-in and check-out)
-- Enable employees to apply for leave and track leave balances
-- Allow administrators to manage employee records, approve or reject leave requests, assign shifts, and generate attendance reports
-- Send automated email/SMS notifications for attendance events and leave approvals
-- Provide a real-time dashboard with analytics and attendance summaries
+- Allow employees to mark their daily attendance (check-in and check-out) via the web interface
+- Enable employees to apply for leave and track leave history
+- Allow administrators and managers to manage employee records, approve or reject leave requests, assign shifts, and generate attendance reports
+- Provide real-time role-specific dashboards with attendance KPIs and analytics
+- Support three distinct user roles: Admin, Manager, and Employee
 
 **The system will NOT:**
 - Handle payroll processing or salary calculation (out of scope)
 - Manage recruitment or onboarding processes
 - Integrate with biometric hardware in this version (planned for v2.0)
 - Support multi-organization tenancy in this version
+- Provide SMS notifications (email/in-app only)
 
 **Benefits:**
 - Eliminates manual paper-based attendance registers
 - Reduces administrative workload by 60–70%
 - Provides accurate, real-time attendance data
-- Ensures transparent leave management for both employees and management
+- Ensures transparent leave management for all roles
 
 ### 1.3 Definitions, Acronyms, and Abbreviations
 
@@ -104,41 +106,40 @@ The **Employee Attendance System** is a web-based application that enables organ
 |---|---|
 | **SRS** | Software Requirements Specification |
 | **EAS** | Employee Attendance System |
-| **Admin** | Administrator — a privileged user who manages the system |
+| **Admin** | Administrator — full system access; manages employees, leaves, shifts, and reports |
+| **Manager** | Supervisory role — can review attendance and leave requests for their team |
 | **Employee** | A registered user who marks attendance and applies for leave |
-| **Check-in** | The act of recording the start of a work day |
-| **Check-out** | The act of recording the end of a work day |
+| **Check-in** | Recording the start of a working day (web-based) |
+| **Check-out** | Recording the end of a working day (web-based) |
 | **Leave** | An authorized absence from work |
-| **Shift** | A defined working time slot assigned to an employee |
-| **Report** | A generated summary of attendance data over a given period |
-| **OTP** | One-Time Password — used for secure login verification |
-| **JWT** | JSON Web Token — used for session authentication |
-| **API** | Application Programming Interface |
-| **UI** | User Interface |
-| **DB** | Database |
-| **HTTP/HTTPS** | HyperText Transfer Protocol / Secure |
-| **CRUD** | Create, Read, Update, Delete |
+| **Shift** | A defined working time slot with start time, end time, and working days |
+| **CUID** | Collision-resistant Unique Identifier — used as primary key format in this system |
+| **JWT** | JSON Web Token — used for session authentication (stored in HTTP-only cookies) |
 | **RBAC** | Role-Based Access Control |
+| **ORM** | Object-Relational Mapper — Prisma is used in this system |
+| **API** | Application Programming Interface (REST/JSON) |
+| **CRUD** | Create, Read, Update, Delete |
+| **HTTP-only Cookie** | A browser cookie inaccessible to JavaScript — used to store JWT tokens securely |
+| **Grace Period** | Minutes after shift start within which a check-in is not counted as late |
 
 ### 1.4 References
 
 - IEEE Std 830-1998 — IEEE Recommended Practice for Software Requirements Specifications
-- IEEE Std 1233-1998 — Guide for Developing System Requirements Specifications
+- NestJS Documentation — https://docs.nestjs.com
+- Next.js Documentation — https://nextjs.org/docs
+- Prisma ORM Documentation — https://www.prisma.io/docs
 - Sommerville, I. (2016). *Software Engineering*, 10th Edition. Pearson
-- Pressman, R. S. (2014). *Software Engineering: A Practitioner's Approach*, 8th Edition. McGraw-Hill
 - ISO/IEC 25010:2011 — Systems and software Quality Requirements and Evaluation (SQuaRE)
 
 ### 1.5 Overview of Document
 
-The remainder of this document is organized as follows:
-
-- **Section 2** provides an overall description of the product, including its perspective, key functions, types of users, and constraints.
-- **Section 3** details all functional requirements organized by feature modules.
-- **Section 4** describes external interface requirements including UI, hardware, software, and communication interfaces.
-- **Section 5** specifies non-functional requirements such as performance, security, and scalability.
-- **Section 6** provides system models including use case and class diagram summaries.
-- **Section 7** covers database requirements and table schemas.
-- **Section 8** contains the appendix with supplementary information.
+- **Section 2** — Overall description of the product, user roles, operating environment, and constraints.
+- **Section 3** — All functional requirements organized by feature module.
+- **Section 4** — External interface requirements (UI, hardware, software, communication).
+- **Section 5** — Non-functional requirements: performance, security, scalability, etc.
+- **Section 6** — System models: use case and class diagram summaries.
+- **Section 7** — Database schema derived from the actual Prisma schema.
+- **Section 8** — Appendix: glossary, traceability matrix, future work, revision history.
 
 ---
 
@@ -146,70 +147,65 @@ The remainder of this document is organized as follows:
 
 ### 2.1 Product Perspective
 
-The Employee Attendance System is a standalone web-based application. It is designed as a new self-contained system and does not directly replace an existing automated system — rather, it replaces traditional manual attendance registers and spreadsheet-based tracking.
+The Employee Attendance System is a standalone, full-stack web application. It replaces traditional manual attendance registers and spreadsheet-based tracking with a real-time digital platform.
 
-The system operates as a three-tier architecture:
+The system follows a three-tier architecture:
 
 ```
-┌─────────────────────────────────────────────┐
-│              Presentation Layer              │
-│          (Web Browser / Mobile UI)          │
-└─────────────────────┬───────────────────────┘
-                      │ HTTP/HTTPS
-┌─────────────────────▼───────────────────────┐
-│              Application Layer               │
-│          (Backend Server / REST API)         │
-└─────────────────────┬───────────────────────┘
-                      │ SQL Queries
-┌─────────────────────▼───────────────────────┐
-│                 Data Layer                   │
-│          (Relational Database Server)        │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│               Presentation Layer                  │
+│     Next.js 16 + React 19 (App Router, TypeScript)│
+└─────────────────────┬────────────────────────────┘
+                      │ HTTPS / REST (JSON)
+┌─────────────────────▼────────────────────────────┐
+│               Application Layer                   │
+│      NestJS 11 (TypeScript, Passport JWT, RBAC)   │
+└─────────────────────┬────────────────────────────┘
+                      │ Prisma ORM
+┌─────────────────────▼────────────────────────────┐
+│                  Data Layer                       │
+│           PostgreSQL (via Prisma 5.x)             │
+└──────────────────────────────────────────────────┘
 ```
 
-The system interfaces with:
-- Email servers (SMTP) for sending notifications
-- SMS gateway APIs (optional, for SMS alerts)
-- Web browsers as the primary client interface
+The system is containerized with Docker and Docker Compose and deployed at **http://attendance.azadur.com.bd/**.
 
 ### 2.2 Product Functions
 
-The major functions of the Employee Attendance System are summarized below:
-
 | # | Function | Description |
 |---|---|---|
-| F1 | User Authentication | Secure login/logout with role-based access control |
-| F2 | Employee Management | Add, update, deactivate, and view employee profiles |
-| F3 | Attendance Marking | Daily check-in and check-out with timestamps |
-| F4 | Attendance Viewing | View personal or team attendance history |
-| F5 | Leave Application | Submit, track, and cancel leave requests |
-| F6 | Leave Approval | Admin reviews, approves, or rejects leave requests |
-| F7 | Shift Management | Assign and manage work shifts for employees |
-| F8 | Report Generation | Generate and export monthly/weekly attendance reports |
-| F9 | Notification System | Automated alerts for attendance and leave events |
-| F10 | Dashboard | Real-time overview of attendance statistics |
+| F1 | User Authentication | Secure login/logout using JWT stored in HTTP-only cookies |
+| F2 | Role-Based Access Control | Three roles (Admin, Manager, Employee) with guarded API routes |
+| F3 | Employee Management | Add, update, activate/deactivate employee profiles with unique codes |
+| F4 | Attendance Marking | Web-based check-in and check-out with automatic status classification |
+| F5 | Attendance Viewing | View personal or team attendance history with date filters |
+| F6 | Leave Application | Submit, track, and cancel leave requests |
+| F7 | Leave Approval | Admin/Manager reviews and approves or rejects leave requests |
+| F8 | Shift Management | Define shifts with start time, end time, working days, and grace period |
+| F9 | Report Generation | Generate and filter monthly/weekly attendance summaries and charts |
+| F10 | Dashboard | Real-time role-specific KPI overview of attendance statistics |
 
 ### 2.3 User Classes and Characteristics
 
-The system supports three distinct user roles:
+The system supports three distinct user roles, stored as the `UserRole` enum in the database.
 
-#### 2.3.1 Employee
+#### 2.3.1 Employee (`EMPLOYEE`)
 - **Description:** Regular staff members who use the system daily to mark attendance and manage their leave
-- **Technical Proficiency:** Basic computer/smartphone literacy assumed
-- **Frequency of Use:** Daily (for attendance), occasionally (for leave management)
-- **Access Level:** Limited — can only view and manage their own data
-- **Key Activities:** Check-in, check-out, view attendance, apply for leave, view payslip, update profile
+- **Technical Proficiency:** Basic computer literacy assumed
+- **Frequency of Use:** Daily (attendance), occasionally (leave)
+- **Access Level:** Own data only — check-in/out, own attendance history, own leave requests, own dashboard
 
-#### 2.3.2 Administrator (Admin)
-- **Description:** HR managers or supervisors who oversee the entire system
+#### 2.3.2 Manager (`MANAGER`)
+- **Description:** Team supervisors who oversee their team's attendance and leave
 - **Technical Proficiency:** Moderate computer literacy
 - **Frequency of Use:** Daily
-- **Access Level:** Full — can manage all employee data and system configurations
-- **Key Activities:** Add/remove employees, approve leave, manage shifts, generate reports, send notifications
+- **Access Level:** Can view team attendance, review leave requests, and manage shifts for their team
 
-#### 2.3.3 System (Automated)
-- **Description:** The system itself acts as an actor for automated tasks
-- **Key Activities:** Send scheduled notifications, auto-mark absent if no check-in by cutoff time, generate scheduled reports
+#### 2.3.3 Administrator (`ADMIN`)
+- **Description:** HR personnel or system administrators who oversee the entire organization
+- **Technical Proficiency:** Moderate computer literacy
+- **Frequency of Use:** Daily
+- **Access Level:** Full — manage all employees, approve leave, manage shifts, generate all reports, override attendance
 
 ### 2.4 Operating Environment
 
@@ -219,43 +215,44 @@ The system supports three distinct user roles:
 | **Web Browser** | Google Chrome 90+, Mozilla Firefox 88+, Microsoft Edge 90+, Safari 14+ |
 | **Internet Connection** | Minimum 1 Mbps broadband |
 | **Screen Resolution** | Minimum 1280 × 720 pixels |
-| **Mobile Support** | Responsive design for Android 8+ and iOS 13+ |
+| **Mobile Support** | Responsive design supported (portrait and landscape) |
 
-#### Server-Side Requirements
+#### Server-Side Requirements (Actual Deployment Stack)
 | Component | Requirement |
 |---|---|
-| **Operating System** | Ubuntu 20.04 LTS or Windows Server 2019 |
-| **Web Server** | Apache 2.4+ or Nginx 1.18+ |
-| **Runtime Environment** | Node.js 18+ (or Java 17 / Python 3.10+) |
-| **Database** | MySQL 8.0+ or PostgreSQL 14+ |
-| **RAM** | Minimum 4 GB (8 GB recommended) |
-| **Storage** | Minimum 50 GB SSD |
+| **Operating System** | Ubuntu 22.04 LTS (Docker host) |
+| **Container Runtime** | Docker + Docker Compose |
+| **Backend Runtime** | Node.js 20+ (NestJS 11 requirement) |
+| **Frontend Runtime** | Node.js 20+ (Next.js 16 build) |
+| **Database** | PostgreSQL 14+ |
+| **RAM** | Minimum 2 GB (4 GB recommended) |
+| **Storage** | Minimum 20 GB SSD |
 
 ### 2.5 Design and Implementation Constraints
 
-- The system must be implemented as a web application accessible through standard web browsers without requiring any plugin installation
-- All passwords must be stored using industry-standard hashing algorithms (bcrypt with salt)
-- The system must comply with applicable data protection regulations
-- Session tokens must expire after 8 hours of inactivity
-- The system must use HTTPS for all data transmission
-- The codebase must follow MVC (Model-View-Controller) architectural pattern
-- The system must support at least 500 concurrent users without performance degradation
-- All date and time values must be stored in UTC and displayed in the user's local timezone
+- The system is implemented as a web application accessible through standard web browsers without any plugin installation
+- All passwords are hashed using **bcrypt** before storage
+- JWT tokens are stored exclusively in **HTTP-only cookies** — not in localStorage
+- All API routes are protected by **NestJS Guards** enforcing RBAC
+- The frontend uses **Next.js App Router** with server components by default
+- Database schema changes are managed through **Prisma migration scripts** (`prisma migrate deploy`)
+- The system is containerized via **Docker Compose**, with migrations running automatically on startup
+- All primary keys use **CUID** format (string), not integer auto-increment
+- Attendance records are unique per employee per date (enforced by a composite unique index)
 
 ### 2.6 Assumptions and Dependencies
 
 **Assumptions:**
-- Every employee has a unique registered email address in the organization
+- Every employee has a unique registered email address
 - Administrators are responsible for onboarding new employees into the system
-- The organization follows a standard working week (e.g., 5 or 6 days per week)
 - Internet connectivity is available at the workplace for employees to mark attendance
-- Employees are expected to mark attendance personally and not on behalf of others
+- Employees mark attendance personally and not on behalf of others
 
 **Dependencies:**
-- The system depends on a functioning SMTP server for email notifications
-- The system depends on a reliable database server for data persistence
-- Accurate system time on the server is required for correct timestamp recording
-- Third-party SMS gateway availability (for optional SMS notifications)
+- PostgreSQL database server must be running and accessible
+- Prisma Client must be generated (`prisma generate`) before the backend starts
+- Accurate server-side time (UTC) is required for correct timestamp recording
+- Docker and Docker Compose must be installed on the deployment host
 
 ---
 
@@ -268,160 +265,154 @@ The system supports three distinct user roles:
 ### 3.1 User Authentication and Authorization
 
 #### 3.1.1 Description
-The system shall provide secure login and logout functionality with role-based access control (RBAC) to ensure that each user can only access features and data appropriate to their role.
+The system provides secure login and logout functionality with role-based access control. JWT tokens are issued on successful login and stored in HTTP-only cookies. All protected API endpoints are guarded by NestJS JWT + RBAC guards.
 
 #### 3.1.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-1.1 | The system shall allow users to log in using a registered email address and password | H |
-| FR-1.2 | The system shall validate credentials against the stored hashed password | H |
-| FR-1.3 | The system shall issue a JWT session token upon successful authentication | H |
-| FR-1.4 | The system shall enforce role-based access control for all protected routes | H |
-| FR-1.5 | The system shall allow users to reset their password via a registered email OTP | H |
-| FR-1.6 | The system shall automatically log out a user after 8 hours of inactivity | M |
-| FR-1.7 | The system shall lock an account after 5 consecutive failed login attempts for 15 minutes | M |
-| FR-1.8 | The system shall allow administrators to manually unlock locked accounts | M |
-| FR-1.9 | The system shall maintain an audit log of all login and logout events | M |
-| FR-1.10 | The system shall support "Remember Me" functionality for trusted devices | L |
+| FR-1.2 | The system shall validate credentials against the bcrypt-hashed password in the database | H |
+| FR-1.3 | The system shall issue a signed JWT token and set it in an HTTP-only cookie upon successful login | H |
+| FR-1.4 | The system shall enforce role-based access control (`ADMIN`, `MANAGER`, `EMPLOYEE`) for all protected routes | H |
+| FR-1.5 | The system shall provide a `/auth/me` endpoint to validate the current session and return user details | H |
+| FR-1.6 | The system shall allow users to log out, which clears the HTTP-only cookie | H |
+| FR-1.7 | The system shall lock an account (status: `LOCKED`) and prevent further login when flagged by an admin | M |
+| FR-1.8 | The system shall allow administrators to activate or deactivate user accounts | H |
 
 #### 3.1.3 Stimulus / Response
 
 | Stimulus | System Response |
 |---|---|
-| User submits correct credentials | System validates, issues JWT, redirects to dashboard |
-| User submits incorrect credentials | System displays error message; increments failed attempt counter |
-| 5 failed attempts | Account temporarily locked; admin notified via email |
-| User clicks "Forgot Password" | System sends OTP to registered email within 2 minutes |
-| Session expires | System invalidates token; redirects user to login page |
+| User submits correct credentials | System validates, issues JWT in HTTP-only cookie, redirects to dashboard |
+| User submits incorrect credentials | System returns 401 Unauthorized with an error message |
+| User accesses a route without a valid token | System returns 401; frontend redirects to login |
+| User accesses a route outside their role | System returns 403 Forbidden |
+| User clicks "Logout" | System clears the cookie and redirects to login |
 
 ---
 
 ### 3.2 Employee Management
 
 #### 3.2.1 Description
-Administrators shall be able to create, view, update, and deactivate employee records. Each employee shall have a unique profile containing personal and organizational information.
+Administrators can create, view, update, and deactivate employee records. Each employee has a `User` account linked to an `Employee` profile containing organizational information.
 
 #### 3.2.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-2.1 | The system shall allow admins to add new employee profiles with required fields | H |
-| FR-2.2 | The system shall automatically generate a unique Employee ID upon registration | H |
+| FR-2.2 | The system shall assign a unique `employeeCode` to each employee upon creation | H |
 | FR-2.3 | The system shall allow admins to update any employee's profile information | H |
-| FR-2.4 | The system shall allow admins to deactivate (soft-delete) an employee account | H |
-| FR-2.5 | The system shall prevent deactivated employees from logging in | H |
-| FR-2.6 | The system shall allow admins to search employees by name, ID, or department | H |
-| FR-2.7 | The system shall allow employees to update their own contact details and profile photo | M |
-| FR-2.8 | The system shall store the date of joining and department for each employee | H |
-| FR-2.9 | The system shall support bulk import of employee data via CSV file | M |
-| FR-2.10 | The system shall display a full list of active employees with pagination | M |
+| FR-2.4 | The system shall allow admins to deactivate an employee account (status: `INACTIVE`) | H |
+| FR-2.5 | The system shall prevent inactive or locked employees from logging in | H |
+| FR-2.6 | The system shall allow admins to search and list employees | H |
+| FR-2.7 | The system shall allow admins to assign a shift to an employee | H |
+| FR-2.8 | The system shall support an optional profile photo URL per employee | L |
 
 #### 3.2.3 Employee Profile Data Fields
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| Employee ID | String (Auto) | Yes | Unique system-generated identifier |
-| Full Name | String | Yes | Employee's legal full name |
-| Email Address | String | Yes | Unique, used for login |
-| Phone Number | String | Yes | Primary contact number |
-| Department | String | Yes | Department the employee belongs to |
-| Designation | String | Yes | Job title / role |
-| Date of Joining | Date | Yes | When the employee started |
-| Shift | FK Reference | Yes | Assigned working shift |
-| Status | Enum | Yes | Active / Inactive |
-| Profile Photo | Image URL | No | Optional profile picture |
+| id | String (CUID) | Auto | Unique system-generated identifier |
+| employeeCode | String | Auto/Unique | Human-readable employee code |
+| name | String | Yes | Employee's full name (from linked User) |
+| email | String | Yes | Unique login email (from linked User) |
+| phone | String | Yes | Primary contact number |
+| department | String | Yes | Department the employee belongs to |
+| designation | String | Yes | Job title / role |
+| joinDate | DateTime | Yes | When the employee started |
+| shiftId | String (FK) | Optional | Assigned working shift |
+| status | Enum | Yes | ACTIVE / INACTIVE / LOCKED (from User) |
+| profilePhoto | String (URL) | Optional | Profile image URL |
 
 ---
 
 ### 3.3 Attendance Management
 
 #### 3.3.1 Description
-The system shall provide functionality for employees to mark their daily attendance. Each check-in and check-out event must be timestamped and stored. The system must also track attendance status (Present, Absent, Late, Half-Day).
+The system provides web-based attendance marking. Each check-in and check-out is timestamped. The system automatically classifies the attendance status based on shift configuration. Manual overrides by admins are tracked with an audit trail.
 
 #### 3.3.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
-| FR-3.1 | The system shall allow an employee to check in once per working day | H |
+| FR-3.1 | The system shall allow an employee to check in once per working day via the web interface | H |
 | FR-3.2 | The system shall record the exact timestamp of each check-in and check-out | H |
-| FR-3.3 | The system shall prevent an employee from checking in twice on the same day | H |
-| FR-3.4 | The system shall calculate total working hours per day automatically | H |
-| FR-3.5 | The system shall mark an employee as "Late" if check-in is after the shift start time | H |
-| FR-3.6 | The system shall automatically mark an employee as "Absent" if no check-in is recorded by end of shift | H |
-| FR-3.7 | The system shall allow admins to manually correct or override attendance records | M |
-| FR-3.8 | The system shall allow employees to view their attendance history with date filters | H |
-| FR-3.9 | The system shall allow admins to view attendance records of all or individual employees | H |
-| FR-3.10 | The system shall calculate and display monthly attendance percentage per employee | M |
-| FR-3.11 | The system shall mark attendance as "Half-Day" if working hours are less than 50% of shift duration | M |
+| FR-3.3 | The system shall prevent duplicate attendance records for the same employee on the same date (unique constraint) | H |
+| FR-3.4 | The system shall calculate total working time in minutes (`totalMinutes`) per day automatically | H |
+| FR-3.5 | The system shall mark an employee as `LATE` if check-in is after shift start time + grace period | H |
+| FR-3.6 | The system shall mark attendance as `HALF_DAY` if working minutes are less than 50% of shift duration | M |
+| FR-3.7 | The system shall allow admins to manually create or override attendance records (`source: MANUAL`) | M |
+| FR-3.8 | The system shall log the admin who performed a manual override (`overriddenById`) | M |
+| FR-3.9 | The system shall allow employees to view their own attendance history with date filters | H |
+| FR-3.10 | The system shall allow admins and managers to view attendance records of all or individual employees | H |
 
 #### 3.3.3 Attendance Status Definitions
 
 | Status | Definition |
 |---|---|
-| **Present** | Employee checked in and out within valid shift hours |
-| **Late** | Employee checked in after the designated shift start time |
-| **Absent** | No check-in recorded for the working day |
-| **Half-Day** | Working hours less than half the shift duration |
-| **On Leave** | Employee has an approved leave for that day |
-| **Holiday** | Day declared as an official holiday |
+| `PRESENT` | Employee checked in and out within valid shift hours |
+| `LATE` | Employee checked in after shift start time + grace period |
+| `ABSENT` | No check-in recorded for the working day |
+| `HALF_DAY` | Working minutes less than half the shift duration |
+| `ON_LEAVE` | Employee has an approved leave for that day |
+| `HOLIDAY` | Day declared as an official holiday |
+
+#### 3.3.4 Attendance Source
+
+| Source | Description |
+|---|---|
+| `WEB` | Employee marked attendance via the web application (default) |
+| `MANUAL` | Admin created or overrode the attendance record manually |
 
 ---
 
 ### 3.4 Leave Management
 
 #### 3.4.1 Description
-The system shall provide a complete leave management workflow, allowing employees to apply for leave, and administrators to approve or reject those requests. Leave balances must be tracked automatically.
+The system provides a complete leave management workflow. Employees submit leave requests; admins and managers review, approve, or reject them. Leave history is tracked per employee.
 
 #### 3.4.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-4.1 | The system shall allow employees to submit a leave request with start date, end date, leave type, and reason | H |
-| FR-4.2 | The system shall display the employee's remaining leave balance before submission | H |
-| FR-4.3 | The system shall prevent employees from applying for leave if balance is insufficient | H |
-| FR-4.4 | The system shall notify the admin via email/notification when a leave request is submitted | H |
-| FR-4.5 | The system shall allow admins to approve or reject leave requests with an optional comment | H |
-| FR-4.6 | The system shall notify the employee of the admin's decision via email/notification | H |
-| FR-4.7 | The system shall automatically deduct approved leave days from the employee's leave balance | H |
-| FR-4.8 | The system shall allow employees to cancel a pending leave request | M |
-| FR-4.9 | The system shall prevent leave requests for past dates | M |
-| FR-4.10 | The system shall allow admins to configure leave types and annual leave quotas | M |
-| FR-4.11 | The system shall track leave history for each employee | H |
-| FR-4.12 | The system shall mark attendance as "On Leave" for approved leave days | H |
+| FR-4.2 | The system shall calculate `totalDays` automatically based on start and end dates | H |
+| FR-4.3 | The system shall allow admins/managers to approve or reject leave requests with an optional comment | H |
+| FR-4.4 | The system shall record who reviewed the request (`reviewedById`) and when (`reviewedAt`) | H |
+| FR-4.5 | The system shall allow employees to cancel a pending leave request | M |
+| FR-4.6 | The system shall allow employees to view their full leave request history | H |
+| FR-4.7 | The system shall allow admins to view all leave requests across all employees | H |
 
-#### 3.4.3 Leave Types
+#### 4.3.3 Leave Types
 
-| Leave Type | Description | Default Days/Year |
-|---|---|---|
-| Annual Leave | Paid yearly vacation leave | 20 days |
-| Sick Leave | Leave due to illness (medical certificate may be required) | 14 days |
-| Casual Leave | Short-notice leave for personal reasons | 10 days |
-| Maternity Leave | Leave for female employees after childbirth | 112 days |
-| Paternity Leave | Leave for male employees after childbirth | 7 days |
-| Unpaid Leave | Leave without pay | As approved |
+| Leave Type | Description |
+|---|---|
+| `ANNUAL` | Paid yearly vacation leave |
+| `SICK` | Leave due to illness |
+| `CASUAL` | Short-notice leave for personal reasons |
+| `MATERNITY` | Leave for female employees after childbirth |
+| `PATERNITY` | Leave for male employees after childbirth |
+| `UNPAID` | Leave without pay |
 
-#### 3.4.4 Leave Workflow
+#### 3.4.4 Leave Status Lifecycle
 
 ```
-Employee submits request
+Employee submits request  →  status: PENDING
         ↓
-System validates (balance check, date validation)
+Admin / Manager reviews
         ↓
-Admin receives notification
-        ↓
-Admin reviews request
-        ↓
-  ┌─────┴─────┐
-Approved    Rejected
-  ↓              ↓
-Balance        Employee
-deducted    notified with
-Attendance   rejection
-updated      reason
-  ↓
-Employee
-notified
+  ┌─────┴──────┐
+APPROVED     REJECTED
+  ↓               ↓
+status:        status:
+APPROVED      REJECTED
+adminComment  adminComment
+reviewedById  reviewedById
+reviewedAt    reviewedAt
+
+Employee may cancel PENDING request → status: CANCELLED
 ```
 
 ---
@@ -429,92 +420,66 @@ notified
 ### 3.5 Shift Management
 
 #### 3.5.1 Description
-The system shall allow administrators to define work shifts and assign them to individual employees or departments. Shifts determine the expected check-in/check-out times used for calculating late arrivals and absences.
+Administrators define work shifts and assign them to individual employees. Shifts determine the expected check-in/check-out times used for automatic status classification (LATE, HALF_DAY).
 
 #### 3.5.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
-| FR-5.1 | The system shall allow admins to create shift profiles with name, start time, end time, and working days | H |
-| FR-5.2 | The system shall allow admins to assign a shift to an individual employee or a whole department | H |
+| FR-5.1 | The system shall allow admins to create shift profiles with name, start time, end time, working days, and grace period | H |
+| FR-5.2 | The system shall allow admins to assign a shift to an individual employee | H |
 | FR-5.3 | The system shall allow admins to update or delete shift profiles | M |
 | FR-5.4 | The system shall support multiple shift types (e.g., Morning, Evening, Night) | M |
-| FR-5.5 | The system shall use the assigned shift's start/end times for late and overtime calculations | H |
-| FR-5.6 | The system shall allow admins to view all shift assignments in a schedule view | M |
-| FR-5.7 | The system shall notify employees when their shift is changed | M |
+| FR-5.5 | The system shall use the assigned shift's configuration for late and working-hour calculations | H |
+| FR-5.6 | The system shall allow an optional description field per shift | L |
+
+#### 3.5.3 Shift Data Fields
+
+| Field | Type | Description |
+|---|---|---|
+| id | String (CUID) | Unique shift identifier |
+| name | String | Shift name (e.g., "Morning Shift") |
+| startTime | String | Expected check-in time (e.g., "09:00") |
+| endTime | String | Expected check-out time (e.g., "17:00") |
+| workingDays | String | Comma-separated days (e.g., "Mon,Tue,Wed,Thu,Fri") |
+| graceMinutes | Int | Minutes of tolerance before marking LATE (default: 15) |
+| description | String? | Optional notes about the shift |
 
 ---
 
 ### 3.6 Report Generation
 
 #### 3.6.1 Description
-The system shall generate comprehensive attendance reports that can be filtered by date range, department, or employee, and exported in multiple formats.
+The system generates attendance reports filtered by date range, employee, or department, with chart visualizations for management review.
 
 #### 3.6.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-6.1 | The system shall generate individual employee attendance reports | H |
-| FR-6.2 | The system shall generate department-wise attendance summary reports | H |
-| FR-6.3 | The system shall generate monthly attendance summary reports for all employees | H |
-| FR-6.4 | The system shall allow filtering reports by date range, employee, and department | H |
-| FR-6.5 | The system shall allow exporting reports in PDF format | H |
-| FR-6.6 | The system shall allow exporting reports in Excel (XLSX) format | M |
-| FR-6.7 | The system shall allow printing reports directly from the browser | M |
-| FR-6.8 | The system shall allow scheduling automatic monthly reports via email | L |
-| FR-6.9 | The system shall display graphical charts (bar/pie) in the report dashboard | M |
-| FR-6.10 | The system shall include late count, absent count, and leave count in reports | H |
-
-#### 3.6.3 Report Types
-
-| Report | Contents | Audience |
-|---|---|---|
-| Daily Attendance Report | All employee check-in/out for a given day | Admin |
-| Monthly Summary Report | Attendance days, absences, leaves per employee | Admin, HR |
-| Individual Employee Report | Full attendance history for one employee | Admin, Employee |
-| Department Report | Aggregated attendance data per department | Admin |
-| Leave Summary Report | All leave requests and statuses | Admin |
+| FR-6.2 | The system shall generate monthly attendance summary reports | H |
+| FR-6.3 | The system shall allow filtering reports by date range and employee | H |
+| FR-6.4 | The system shall display graphical charts (bar/line) in the report dashboard | M |
+| FR-6.5 | The system shall include late count, absent count, and leave count in reports | H |
+| FR-6.6 | The system shall display attendance percentage per employee | M |
 
 ---
 
-### 3.7 Notification System
+### 3.7 Dashboard and Analytics
 
 #### 3.7.1 Description
-The system shall automatically send notifications to employees and administrators for key attendance and leave events via email and in-app alerts.
+The system provides a role-specific dashboard showing real-time attendance KPIs and summary information.
 
 #### 3.7.2 Functional Requirements
 
 | ID | Requirement | Priority |
 |---|---|---|
-| FR-7.1 | The system shall send an email confirmation to an employee upon successful check-in | M |
-| FR-7.2 | The system shall notify an admin when an employee is marked absent | M |
-| FR-7.3 | The system shall notify an admin when a leave request is submitted | H |
-| FR-7.4 | The system shall notify an employee when their leave request is approved or rejected | H |
-| FR-7.5 | The system shall display in-app notifications in real time | H |
-| FR-7.6 | The system shall allow users to mark notifications as read | M |
-| FR-7.7 | The system shall allow users to view their full notification history | M |
-| FR-7.8 | The system shall send a reminder to employees who have not checked in 30 minutes after shift start | L |
-| FR-7.9 | The system shall notify employees when their shift is updated by an admin | M |
-
----
-
-### 3.8 Dashboard and Analytics
-
-#### 3.8.1 Description
-The system shall provide a role-specific dashboard that presents real-time attendance statistics and summary information in a visual and easy-to-understand format.
-
-#### 3.8.2 Functional Requirements
-
-| ID | Requirement | Priority |
-|---|---|---|
-| FR-8.1 | The system shall display a personalized dashboard upon login based on the user's role | H |
-| FR-8.2 | The admin dashboard shall show total present, absent, and on-leave counts for today | H |
-| FR-8.3 | The employee dashboard shall show the user's attendance status for today | H |
-| FR-8.4 | The admin dashboard shall show pending leave requests requiring action | H |
-| FR-8.5 | The dashboard shall display a monthly attendance trend chart | M |
-| FR-8.6 | The employee dashboard shall display remaining leave balance | H |
-| FR-8.7 | The admin dashboard shall display department-wise attendance breakdown | M |
-| FR-8.8 | The dashboard data shall refresh automatically every 5 minutes | M |
+| FR-7.1 | The system shall display a personalized dashboard upon login based on the user's role | H |
+| FR-7.2 | The admin/manager dashboard shall show total present, absent, late, and on-leave counts for today | H |
+| FR-7.3 | The employee dashboard shall show the user's own attendance status for today | H |
+| FR-7.4 | The admin dashboard shall show pending leave requests requiring action | H |
+| FR-7.5 | The dashboard shall display a monthly attendance trend chart | M |
+| FR-7.6 | The employee dashboard shall display their recent attendance history | H |
 
 ---
 
@@ -523,57 +488,53 @@ The system shall provide a role-specific dashboard that presents real-time atten
 ### 4.1 User Interfaces
 
 #### 4.1.1 General UI Requirements
-- The UI shall be responsive and support desktop (1280px+), tablet (768px–1279px), and mobile (320px–767px) screen sizes
-- The system shall use a clean, professional design with consistent typography and color scheme
-- The system shall provide clear error messages in plain language for all invalid inputs
-- All forms shall include client-side and server-side input validation
-- The system shall display a loading indicator for operations taking longer than 1 second
+- The UI is responsive, supporting desktop (1280px+), tablet (768px–1279px), and mobile (320px–767px)
+- Built with Next.js 16 App Router and React 19 Server Components
+- Consistent design with clear error messages and client-side + server-side input validation
+- Loading indicators displayed for async operations
 
-#### 4.1.2 Key Screens
+#### 4.1.2 Implemented Screens
 
 | Screen | Description |
 |---|---|
-| Login Page | Email/password form with "Forgot Password" link |
-| Employee Dashboard | Today's status, attendance summary, leave balance, notifications |
-| Admin Dashboard | Overview cards, today's attendance, pending leaves, recent activity |
-| Mark Attendance | Check-in / check-out button with current timestamp display |
-| Attendance History | Filterable table of past attendance records |
-| Leave Application Form | Date pickers, leave type dropdown, reason textarea |
-| Leave Management | Admin view of all leave requests with approve/reject actions |
-| Employee List | Searchable, paginated table of all employees |
-| Report Page | Filter controls, table/chart view, export buttons |
-| Notification Panel | List of notifications with read/unread status |
+| Login Page | Email/password form; redirects to role-appropriate dashboard |
+| Dashboard | KPI overview cards — present, absent, late, leave counts; trend charts |
+| Attendance Page | Check-in / check-out button with current timestamp; attendance history table |
+| Employees Page | Searchable, paginated employee list; add/edit/deactivate actions |
+| Leave Page | Leave request form; leave history with status badges; admin approve/reject actions |
+| Shifts Page | Shift list; add/edit shift form with time and working days configuration |
+| Reports Page | Filtered attendance table; bar/line chart visualizations; summary statistics |
 
 ### 4.2 Hardware Interfaces
 
-The system does not directly interface with specialized hardware in version 1.0. However, the system shall:
-- Be accessible on any device with a modern web browser and internet connection
-- Support standard keyboard and mouse input on desktop devices
-- Support touch input on mobile and tablet devices
-- Be compatible with standard network printers for report printing
+The system does not directly interface with specialized hardware in version 1.0.
+- Accessible on any device with a modern web browser and internet connection
+- Supports standard keyboard, mouse, and touch input
 
-> **Planned for v2.0:** Biometric scanner integration (fingerprint/facial recognition) via dedicated hardware API
+> **Planned for v2.0:** Biometric scanner integration (fingerprint/facial recognition)
 
 ### 4.3 Software Interfaces
 
-| Interface | Purpose | Details |
+| Interface | Technology | Purpose |
 |---|---|---|
-| **MySQL / PostgreSQL** | Primary data persistence | JDBC / native driver connection |
-| **SMTP Server** | Email notification delivery | Standard SMTP protocol, port 587 (TLS) |
-| **REST API** | Frontend-backend communication | JSON over HTTP/HTTPS |
-| **PDF Library** | Report export to PDF | e.g., PDFKit, iText, or jsPDF |
-| **XLSX Library** | Report export to Excel | e.g., Apache POI or SheetJS |
-| **JWT Library** | Session token management | e.g., jsonwebtoken (Node.js) |
-| **BCrypt** | Password hashing | Cost factor ≥ 12 |
+| **Frontend** | Next.js 16, React 19, TypeScript | Presentation layer and UI |
+| **Backend API** | NestJS 11, TypeScript | REST API server |
+| **ORM** | Prisma 5.x | Database access and schema migrations |
+| **Database** | PostgreSQL 14+ | Primary data persistence |
+| **Authentication** | @nestjs/jwt, passport-jwt, bcrypt | JWT session management and password hashing |
+| **HTTP Cookies** | cookie-parser | Secure HTTP-only cookie handling |
+| **Validation** | class-validator, class-transformer | DTO validation in NestJS |
+| **Container** | Docker, Docker Compose | Deployment and service orchestration |
+| **Testing** | Jest, Supertest | Unit and integration testing |
 
 ### 4.4 Communication Interfaces
 
 | Protocol | Usage |
 |---|---|
-| **HTTPS (TLS 1.2+)** | All client-server communication |
-| **SMTP (Port 587)** | Outgoing email notifications |
-| **WebSocket (Optional)** | Real-time in-app notification push |
-| **REST / JSON** | API data exchange format |
+| **HTTPS (TLS)** | All client-server communication in production |
+| **HTTP** | Development environment |
+| **REST / JSON** | API data exchange format between frontend and backend |
+| **Cookie (HTTP-only)** | JWT token transport between browser and server |
 
 ---
 
@@ -583,73 +544,65 @@ The system does not directly interface with specialized hardware in version 1.0.
 
 | ID | Requirement |
 |---|---|
-| NFR-1.1 | The system shall respond to any user request within **2 seconds** under normal load |
-| NFR-1.2 | The system shall support at least **500 concurrent users** without performance degradation |
-| NFR-1.3 | Report generation for monthly data shall complete within **5 seconds** |
-| NFR-1.4 | Database queries shall be optimized with indexes to respond in under **500ms** |
-| NFR-1.5 | The system shall handle attendance marking for **200 simultaneous check-ins** without failure |
+| NFR-1.1 | The system shall respond to any API request within **500ms** under normal load |
+| NFR-1.2 | Database queries shall be optimized using Prisma with appropriate indexes |
+| NFR-1.3 | The Next.js frontend shall use code splitting and lazy loading to minimize initial load time |
+| NFR-1.4 | Report generation for monthly data shall complete within **5 seconds** |
 
 ### 5.2 Security Requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-2.1 | All passwords shall be hashed using **bcrypt** with a minimum cost factor of 12 |
-| NFR-2.2 | All data transmission shall be encrypted using **TLS 1.2 or higher** (HTTPS) |
-| NFR-2.3 | The system shall implement **JWT tokens** with a 24-hour expiry for session management |
-| NFR-2.4 | The system shall enforce **Role-Based Access Control (RBAC)** for all API endpoints |
-| NFR-2.5 | The system shall sanitize all user inputs to prevent **SQL injection** attacks |
-| NFR-2.6 | The system shall implement **CSRF protection** on all state-changing operations |
-| NFR-2.7 | The system shall implement **rate limiting** — max 100 requests per minute per IP |
-| NFR-2.8 | The system shall maintain a complete **audit log** of all critical administrative actions |
-| NFR-2.9 | Sensitive employee data shall be accessible only to authorized roles |
-| NFR-2.10 | The system shall not expose internal stack traces or error details to the client |
+| NFR-2.1 | All passwords shall be hashed using **bcrypt** before storage |
+| NFR-2.2 | JWT tokens shall be stored exclusively in **HTTP-only cookies** (not localStorage) |
+| NFR-2.3 | All API endpoints shall be protected by **NestJS JWT Guards** |
+| NFR-2.4 | The system shall enforce **RBAC** — each role can only access permitted routes and data |
+| NFR-2.5 | All user inputs shall be validated via **class-validator** DTOs on the backend |
+| NFR-2.6 | The system shall not expose internal stack traces or error details to the client in production |
+| NFR-2.7 | All data transmission shall use **HTTPS** in production |
 
 ### 5.3 Reliability Requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-3.1 | The system shall have a target uptime of **99.5%** per month |
-| NFR-3.2 | The system shall perform **automated daily database backups** with 30-day retention |
-| NFR-3.3 | The system shall recover from a server crash and restore full service within **30 minutes** |
-| NFR-3.4 | No data submitted by users shall be lost in the event of a system failure |
-| NFR-3.5 | Attendance records, once saved, shall be immutable without an explicit admin override log entry |
+| NFR-3.1 | The system shall run **Prisma migrations automatically** on container startup |
+| NFR-3.2 | Attendance records, once saved, shall be immutable without an explicit admin override (logged with `overriddenById`) |
+| NFR-3.3 | No submitted data shall be lost in the event of a server restart (persisted in PostgreSQL) |
 
 ### 5.4 Availability Requirements
 
 | ID | Requirement |
 |---|---|
 | NFR-4.1 | The system shall be available **24 hours a day, 7 days a week** |
-| NFR-4.2 | Scheduled maintenance windows shall not exceed **2 hours per month** and shall be communicated 48 hours in advance |
-| NFR-4.3 | The system shall display a user-friendly maintenance page during downtime |
+| NFR-4.2 | The system shall display a user-friendly error page during unexpected downtime |
+| NFR-4.3 | Docker Compose shall restart services automatically on failure (`restart: unless-stopped`) |
 
 ### 5.5 Maintainability Requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-5.1 | The codebase shall follow the **MVC design pattern** for clear separation of concerns |
-| NFR-5.2 | All code shall include inline comments and follow standard naming conventions |
-| NFR-5.3 | The system shall provide a comprehensive **API documentation** (e.g., Swagger/OpenAPI) |
-| NFR-5.4 | Database schema changes shall be managed via **version-controlled migration scripts** |
-| NFR-5.5 | Unit tests shall cover at least **70%** of the business logic codebase |
+| NFR-5.1 | The backend shall follow **NestJS module architecture** — separate modules for auth, employees, attendance, leave, shifts, reports |
+| NFR-5.2 | All database schema changes shall be managed via **Prisma migration scripts** under version control |
+| NFR-5.3 | The codebase shall use **TypeScript** throughout (both frontend and backend) |
+| NFR-5.4 | Unit tests shall be written using **Jest** for service layer business logic |
+| NFR-5.5 | Integration tests shall use **Supertest** against the NestJS API |
 
 ### 5.6 Scalability Requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-6.1 | The system architecture shall support **horizontal scaling** (adding more server instances) |
-| NFR-6.2 | The database shall be designed to efficiently handle up to **10,000 employee records** |
-| NFR-6.3 | The system shall support storing **5+ years of attendance history** without performance loss |
-| NFR-6.4 | The system shall use **database connection pooling** to manage high concurrent access |
+| NFR-6.1 | The stateless NestJS API design shall support **horizontal scaling** |
+| NFR-6.2 | The database shall efficiently handle growing employee and attendance records |
+| NFR-6.3 | The system shall use **Prisma connection pooling** to manage concurrent database access |
 
 ### 5.7 Usability Requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-7.1 | A new employee shall be able to complete the check-in process within **30 seconds** of first use |
-| NFR-7.2 | The UI shall follow **WCAG 2.1 Level AA** accessibility guidelines |
-| NFR-7.3 | All error messages shall be in plain, user-friendly language with suggested corrective actions |
-| NFR-7.4 | The system shall support **English** as the primary language |
-| NFR-7.5 | The system shall provide **tooltips and help text** for all complex form fields |
+| NFR-7.1 | A new employee shall be able to complete the check-in process within **30 seconds** |
+| NFR-7.2 | All error messages shall be in plain, user-friendly language |
+| NFR-7.3 | The UI shall support **English** as the primary language |
+| NFR-7.4 | The system shall display appropriate loading and empty states throughout the UI |
 
 ---
 
@@ -657,170 +610,182 @@ The system does not directly interface with specialized hardware in version 1.0.
 
 ### 6.1 Use Case Diagram Summary
 
+> See file: `attendance-use-case.drawio.pdf`
+
 The system has three primary actors:
 
 | Actor | Role |
 |---|---|
-| **Employee** | Marks attendance, views history, applies for and manages leave |
-| **Admin** | Manages employees, approves leave, generates reports, manages shifts |
-| **System** | Sends automated notifications, auto-marks absent employees |
+| **Employee** | Marks attendance, views history, applies for and cancels leave |
+| **Manager** | Views team attendance, reviews leave requests, manages shifts |
+| **Admin** | Full system access — manages employees, approves leave, generates reports, overrides attendance |
 
 **Key Use Cases:**
 
 | Use Case | Actor(s) | Description |
 |---|---|---|
-| Mark Attendance | Employee | Check-in and check-out for the working day |
-| View Attendance | Employee, Admin | View personal or team attendance records |
-| Apply for Leave | Employee | Submit a leave request to admin |
-| Approve / Reject Leave | Admin | Review and decide on leave requests |
+| Login / Logout | All | Authenticate with email + password |
+| Mark Attendance | Employee | Web-based check-in and check-out for the working day |
+| View Attendance | Employee, Manager, Admin | View personal or team attendance records |
+| Apply for Leave | Employee | Submit a leave request |
+| Cancel Leave | Employee | Cancel a pending leave request |
+| Approve / Reject Leave | Manager, Admin | Review and decide on leave requests |
 | Manage Employees | Admin | CRUD operations on employee profiles |
-| Generate Report | Admin | Create and export attendance reports |
-| Send Notification | System | Automated alerts to relevant users |
+| Assign Shift | Admin | Assign a shift profile to an employee |
+| Manage Shifts | Admin, Manager | Create, update, view shift profiles |
+| Generate Report | Admin, Manager | View attendance reports with charts |
+| Override Attendance | Admin | Manually create or correct an attendance record |
 
 **Relationships:**
-- Mark Attendance `«include»` Send Notification
-- Approve / Reject Leave `«include»` Send Notification
+- Approve / Reject Leave `«include»` Update Leave Status
+- Mark Attendance `«include»` Classify Status (Present / Late / Half-Day)
+- Override Attendance `«extend»` Mark Attendance
 
 ### 6.2 Class Diagram Summary
 
-The system is modeled with the following primary classes:
+> See file: `attendance-class-diagram.drawio.pdf`
 
 | Class | Type | Key Responsibilities |
 |---|---|---|
-| `Person` | Abstract | Base class for all users; holds common identity attributes |
-| `Employee` | Concrete | Marks attendance, applies for leave, views data |
-| `Admin` | Concrete | Manages system, approves leave, generates reports |
-| `Attendance` | Concrete | Stores daily check-in/out records per employee |
-| `LeaveRequest` | Concrete | Represents a single leave application and its lifecycle |
-| `Shift` | Concrete | Defines working hours and days assigned to employees |
-| `Report` | Concrete | Generated attendance summary data |
-| `Notification` | Concrete | In-app and email alert records |
+| `User` | Concrete | Stores credentials, role, and account status; base identity entity |
+| `Employee` | Concrete | Stores organizational profile; linked 1-to-1 with `User` |
+| `Shift` | Concrete | Defines working hours, days, and grace period |
+| `AttendanceRecord` | Concrete | Stores daily check-in/out per employee; tracks status and source |
+| `LeaveRequest` | Concrete | Represents a leave application and its approval lifecycle |
 
 **Key Relationships:**
-- `Employee` and `Admin` inherit from `Person` (Generalization)
-- `Employee` has many `Attendance` records (Composition, 1 to *)
-- `Employee` has many `LeaveRequest` records (Composition, 1 to *)
-- `Admin` generates `Report` (Composition)
-- `Admin` approves/rejects `LeaveRequest` (Dependency)
-- `Employee` receives `Notification` (Association)
-- `Employee` is assigned a `Shift` (Association)
+- `User` has zero or one `Employee` (one-to-one, optional — admins may not have an Employee profile)
+- `Employee` has many `AttendanceRecord` (one-to-many, cascade delete)
+- `Employee` has many `LeaveRequest` (one-to-many, cascade delete)
+- `Employee` is assigned one `Shift` (many-to-one, optional)
+- `User` (Admin) reviews many `LeaveRequest` (one-to-many via `reviewedBy`)
+- `User` (Admin) overrides many `AttendanceRecord` (one-to-many via `overriddenBy`)
 
 ### 6.3 Data Flow Overview
 
 ```
-[Employee] ──check-in──► [Attendance Module] ──saves──► [Database]
-                                  │
-                           [Notification] ──email──► [Employee]
-                                  │
-                           [Report Module] ◄──query── [Admin]
-                                  │
-                           [PDF/XLSX Export] ──► [Admin]
+[Employee] ──check-in──► [Attendance Module]
+                                │
+                     classify status based on Shift
+                                │
+                         save AttendanceRecord
+                                │
+                    [PostgreSQL via Prisma ORM]
 
-[Employee] ──leave request──► [Leave Module] ──notifies──► [Admin]
-                                                    │
-                                            [Approve/Reject]
-                                                    │
-                                    ┌───────────────┘
-                             ┌──────▼──────┐
-                         Approved        Rejected
-                             │               │
-                      Balance update    Notification
-                      Attendance mark   to Employee
-                      Notification
-                      to Employee
+[Employee] ──leave request──► [Leave Module]
+                                      │
+                              validate & save
+                              LeaveRequest (PENDING)
+                                      │
+                         [Admin / Manager reviews]
+                                      │
+                          ┌───────────┴────────────┐
+                       APPROVED                  REJECTED
+                          │                          │
+                    update status              update status
+                    record reviewer            record reviewer
+                    mark attendance            notify result
+                    ON_LEAVE for dates
+
+[Admin] ──query──► [Report Module] ──► aggregated data ──► [Dashboard / Charts]
 ```
 
 ---
 
 ## 7. Database Requirements
 
-### 7.1 Entity Descriptions
+The following schema is derived directly from the production Prisma schema (`backend/prisma/schema.prisma`).
 
-The system requires the following primary database tables:
+---
 
-#### Table: `users`
-| Column | Data Type | Constraints | Description |
+### Table: `User`
+
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| user_id | VARCHAR(20) | PK, NOT NULL | Unique user identifier |
-| name | VARCHAR(100) | NOT NULL | Full name |
-| email | VARCHAR(150) | UNIQUE, NOT NULL | Login email |
-| password_hash | VARCHAR(255) | NOT NULL | Bcrypt hashed password |
-| role | ENUM | NOT NULL | 'employee' or 'admin' |
-| status | ENUM | NOT NULL | 'active' or 'inactive' |
-| created_at | DATETIME | NOT NULL | Record creation timestamp |
+| id | String (CUID) | PK | Unique user identifier |
+| email | String | UNIQUE, NOT NULL | Login email |
+| name | String | NOT NULL | Full name |
+| passwordHash | String | NOT NULL | bcrypt-hashed password |
+| role | Enum (UserRole) | NOT NULL, DEFAULT EMPLOYEE | ADMIN / MANAGER / EMPLOYEE |
+| status | Enum (UserStatus) | NOT NULL, DEFAULT ACTIVE | ACTIVE / INACTIVE / LOCKED |
+| createdAt | DateTime | NOT NULL, DEFAULT now() | Record creation timestamp |
+| updatedAt | DateTime | NOT NULL, auto-update | Last modification timestamp |
 
-#### Table: `employees`
-| Column | Data Type | Constraints | Description |
-|---|---|---|---|
-| employee_id | VARCHAR(20) | PK, FK(users) | Employee identifier |
-| department | VARCHAR(100) | NOT NULL | Department name |
-| designation | VARCHAR(100) | NOT NULL | Job title |
-| shift_id | INT | FK(shifts) | Assigned shift |
-| date_of_joining | DATE | NOT NULL | Joining date |
-| phone | VARCHAR(20) | NOT NULL | Contact number |
-| profile_photo | VARCHAR(255) | NULL | Profile image URL |
+---
 
-#### Table: `attendance`
-| Column | Data Type | Constraints | Description |
-|---|---|---|---|
-| attendance_id | INT | PK, AUTO_INCREMENT | Record identifier |
-| employee_id | VARCHAR(20) | FK(employees), NOT NULL | Employee reference |
-| date | DATE | NOT NULL | Attendance date |
-| check_in_time | DATETIME | NULL | Check-in timestamp |
-| check_out_time | DATETIME | NULL | Check-out timestamp |
-| total_hours | DECIMAL(5,2) | NULL | Calculated working hours |
-| status | ENUM | NOT NULL | Present/Absent/Late/Half-Day/On Leave/Holiday |
-| is_manual_override | BOOLEAN | DEFAULT FALSE | Admin override flag |
-| override_by | VARCHAR(20) | FK(users), NULL | Admin who modified |
-| UNIQUE | (employee_id, date) | | Prevent duplicate entries |
+### Table: `Employee`
 
-#### Table: `leave_requests`
-| Column | Data Type | Constraints | Description |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| leave_id | INT | PK, AUTO_INCREMENT | Leave request identifier |
-| employee_id | VARCHAR(20) | FK(employees), NOT NULL | Applicant |
-| leave_type | ENUM | NOT NULL | Annual/Sick/Casual/etc. |
-| start_date | DATE | NOT NULL | Leave start date |
-| end_date | DATE | NOT NULL | Leave end date |
-| total_days | INT | NOT NULL | Number of leave days |
-| reason | TEXT | NOT NULL | Reason for leave |
-| status | ENUM | NOT NULL | Pending/Approved/Rejected/Cancelled |
-| admin_comment | TEXT | NULL | Admin feedback |
-| reviewed_by | VARCHAR(20) | FK(users), NULL | Admin who reviewed |
-| created_at | DATETIME | NOT NULL | Submission timestamp |
-| reviewed_at | DATETIME | NULL | Review timestamp |
+| id | String (CUID) | PK | Unique employee record identifier |
+| employeeCode | String | UNIQUE, NOT NULL | Human-readable code (e.g., EMP-0001) |
+| department | String | NOT NULL | Department name |
+| designation | String | NOT NULL | Job title |
+| joinDate | DateTime | NOT NULL | Date of joining |
+| phone | String | NOT NULL | Contact number |
+| profilePhoto | String? | NULL | Optional profile image URL |
+| userId | String | UNIQUE, FK → User | Linked user account (cascade delete) |
+| shiftId | String? | FK → Shift, NULL | Assigned shift (optional) |
+| createdAt | DateTime | NOT NULL | Record creation timestamp |
+| updatedAt | DateTime | NOT NULL | Last modification timestamp |
 
-#### Table: `shifts`
-| Column | Data Type | Constraints | Description |
-|---|---|---|---|
-| shift_id | INT | PK, AUTO_INCREMENT | Shift identifier |
-| shift_name | VARCHAR(50) | NOT NULL | e.g., "Morning Shift" |
-| start_time | TIME | NOT NULL | Expected check-in time |
-| end_time | TIME | NOT NULL | Expected check-out time |
-| working_days | VARCHAR(50) | NOT NULL | e.g., "Mon,Tue,Wed,Thu,Fri" |
-| grace_minutes | INT | DEFAULT 15 | Late threshold in minutes |
+---
 
-#### Table: `notifications`
-| Column | Data Type | Constraints | Description |
-|---|---|---|---|
-| notif_id | INT | PK, AUTO_INCREMENT | Notification identifier |
-| user_id | VARCHAR(20) | FK(users), NOT NULL | Target user |
-| message | TEXT | NOT NULL | Notification content |
-| type | ENUM | NOT NULL | Info/Success/Warning/Alert |
-| is_read | BOOLEAN | DEFAULT FALSE | Read status |
-| created_at | DATETIME | NOT NULL | Creation timestamp |
+### Table: `Shift`
 
-#### Table: `leave_balance`
-| Column | Data Type | Constraints | Description |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| balance_id | INT | PK, AUTO_INCREMENT | Balance record identifier |
-| employee_id | VARCHAR(20) | FK(employees), NOT NULL | Employee |
-| leave_type | ENUM | NOT NULL | Leave type |
-| year | YEAR | NOT NULL | Fiscal year |
-| total_days | INT | NOT NULL | Annual entitlement |
-| used_days | INT | DEFAULT 0 | Days used so far |
-| remaining_days | INT (computed) | — | total_days - used_days |
-| UNIQUE | (employee_id, leave_type, year) | | One record per type per year |
+| id | String (CUID) | PK | Unique shift identifier |
+| name | String | NOT NULL | Shift name (e.g., "Morning Shift") |
+| startTime | String | NOT NULL | Expected check-in time (e.g., "09:00") |
+| endTime | String | NOT NULL | Expected check-out time (e.g., "17:00") |
+| workingDays | String | NOT NULL | Comma-separated (e.g., "Mon,Tue,Wed,Thu,Fri") |
+| graceMinutes | Int | NOT NULL, DEFAULT 15 | Tolerance before marking LATE |
+| description | String? | NULL | Optional notes |
+| createdAt | DateTime | NOT NULL | Record creation timestamp |
+| updatedAt | DateTime | NOT NULL | Last modification timestamp |
+
+---
+
+### Table: `AttendanceRecord`
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | String (CUID) | PK | Record identifier |
+| employeeId | String | FK → Employee, NOT NULL | Employee reference (cascade delete) |
+| date | DateTime | NOT NULL | Attendance date |
+| checkIn | DateTime? | NULL | Check-in timestamp |
+| checkOut | DateTime? | NULL | Check-out timestamp |
+| totalMinutes | Int? | NULL | Calculated working time in minutes |
+| status | Enum (AttendanceStatus) | NOT NULL | PRESENT / ABSENT / LATE / HALF_DAY / ON_LEAVE / HOLIDAY |
+| source | Enum (AttendanceSource) | NOT NULL, DEFAULT WEB | WEB / MANUAL |
+| isManualOverride | Boolean | DEFAULT false | True if admin modified this record |
+| overriddenById | String? | FK → User, NULL | Admin who performed the override |
+| createdAt | DateTime | NOT NULL | Record creation timestamp |
+| updatedAt | DateTime | NOT NULL | Last modification timestamp |
+| **UNIQUE** | (employeeId, date) | | Prevent duplicate entries per day |
+| **INDEX** | date | | Optimized date-range queries |
+
+---
+
+### Table: `LeaveRequest`
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | String (CUID) | PK | Leave request identifier |
+| employeeId | String | FK → Employee, NOT NULL | Applicant (cascade delete) |
+| leaveType | Enum (LeaveType) | NOT NULL | ANNUAL / SICK / CASUAL / MATERNITY / PATERNITY / UNPAID |
+| startDate | DateTime | NOT NULL | Leave start date |
+| endDate | DateTime | NOT NULL | Leave end date |
+| totalDays | Int | NOT NULL | Number of leave days requested |
+| reason | String | NOT NULL | Reason for leave |
+| status | Enum (LeaveStatus) | NOT NULL, DEFAULT PENDING | PENDING / APPROVED / REJECTED / CANCELLED |
+| adminComment | String? | NULL | Optional reviewer feedback |
+| reviewedById | String? | FK → User, NULL | Admin/Manager who reviewed |
+| reviewedAt | DateTime? | NULL | Timestamp of the review decision |
+| createdAt | DateTime | NOT NULL | Submission timestamp |
+| updatedAt | DateTime | NOT NULL | Last modification timestamp |
+| **INDEX** | (employeeId, status) | | Optimized status filter queries |
 
 ---
 
@@ -830,45 +795,45 @@ The system requires the following primary database tables:
 
 | Term | Meaning |
 |---|---|
-| **Soft Delete** | Marking a record as inactive rather than permanently removing it from the database |
-| **JWT** | JSON Web Token — a compact, self-contained way to securely transmit user identity information |
-| **RBAC** | Role-Based Access Control — a method of regulating access based on user roles |
-| **CRUD** | Create, Read, Update, Delete — the four basic operations of persistent data |
-| **SMTP** | Simple Mail Transfer Protocol — used for sending emails |
-| **TLS** | Transport Layer Security — a cryptographic protocol for secure communication |
-| **REST API** | Representational State Transfer API — an architectural style for web APIs |
-| **MVC** | Model-View-Controller — a software design pattern for web applications |
-| **Grace Period** | A short time window after shift start within which late check-in is still allowed |
+| **CUID** | Collision-resistant Unique Identifier — a string-based ID format used as primary keys in this system |
+| **Soft Delete** | Marking a record as `INACTIVE` rather than permanently removing it from the database |
+| **HTTP-only Cookie** | A browser cookie that cannot be accessed via JavaScript, used here to store JWT tokens securely |
+| **RBAC** | Role-Based Access Control — method of restricting access based on a user's assigned role |
+| **Prisma** | A next-generation Node.js ORM providing type-safe database access and migration management |
+| **NestJS Guard** | A NestJS class that determines whether a request is allowed to proceed based on authentication/authorization |
+| **DTO** | Data Transfer Object — a class that defines the shape and validation rules for incoming request data |
+| **Grace Period** | Minutes after shift start during which a check-in is not counted as late |
+| **MANUAL override** | An attendance record created or modified by an Admin, logged with `source: MANUAL` and `isManualOverride: true` |
 
 ### 8.2 Requirement Traceability Matrix (RTM)
 
-| Requirement ID | Feature | Priority | Source |
+| Requirement ID | Feature | Priority | Implemented |
 |---|---|---|---|
-| FR-1.1 – FR-1.10 | Authentication | H/M/L | Stakeholder interview |
-| FR-2.1 – FR-2.10 | Employee Management | H/M | Stakeholder interview |
-| FR-3.1 – FR-3.11 | Attendance Management | H/M | Core system function |
-| FR-4.1 – FR-4.12 | Leave Management | H/M | HR process requirement |
-| FR-5.1 – FR-5.7 | Shift Management | H/M | Stakeholder interview |
-| FR-6.1 – FR-6.10 | Report Generation | H/M/L | Management requirement |
-| FR-7.1 – FR-7.9 | Notification System | H/M/L | User experience requirement |
-| FR-8.1 – FR-8.8 | Dashboard | H/M | Usability requirement |
-| NFR-1.x | Performance | H | System quality standard |
-| NFR-2.x | Security | H | Industry best practice |
-| NFR-3.x – 4.x | Reliability / Availability | H | Operational requirement |
-| NFR-5.x – 6.x | Maintainability / Scalability | M | Long-term requirement |
-| NFR-7.x | Usability | M | User experience standard |
+| FR-1.1 – FR-1.8 | Authentication & RBAC | H/M | Yes — NestJS JWT + Passport + Guards |
+| FR-2.1 – FR-2.8 | Employee Management | H/M/L | Yes — `/employees` module |
+| FR-3.1 – FR-3.10 | Attendance Management | H/M | Yes — `/attendance` module |
+| FR-4.1 – FR-4.7 | Leave Management | H/M | Yes — `/leave` module |
+| FR-5.1 – FR-5.6 | Shift Management | H/M/L | Yes — `/shifts` module |
+| FR-6.1 – FR-6.6 | Report Generation | H/M | Yes — `/reports` module |
+| FR-7.1 – FR-7.6 | Dashboard & Analytics | H/M | Yes — frontend dashboard page |
+| NFR-1.x | Performance | H | Prisma indexes, Next.js code splitting |
+| NFR-2.x | Security | H | bcrypt, HTTP-only JWT, RBAC guards |
+| NFR-3.x | Reliability | H | Prisma migrations, unique constraints |
+| NFR-4.x | Availability | H | Docker Compose auto-restart |
+| NFR-5.x | Maintainability | M | TypeScript, modular NestJS, Prisma migrations |
+| NFR-6.x | Scalability | M | Stateless API, connection pooling |
+| NFR-7.x | Usability | M | Responsive Next.js UI |
 
 ### 8.3 Future Enhancements (Out of Scope for v1.0)
-
-The following features are identified as potential enhancements for future versions:
 
 | Version | Feature |
 |---|---|
 | v2.0 | Biometric scanner integration (fingerprint / facial recognition) |
-| v2.0 | Mobile application (Android & iOS native apps) |
-| v2.0 | GPS-based location verification for remote employees |
+| v2.0 | Mobile application (React Native for Android & iOS) |
+| v2.0 | GPS-based geo-fenced check-in for remote employees |
 | v2.1 | Payroll system integration |
-| v2.1 | Multi-organization / multi-branch support |
+| v2.1 | Multi-organization / multi-branch tenancy support |
+| v2.1 | Email and SMS notification system |
 | v3.0 | AI-based attendance anomaly detection |
 | v3.0 | Predictive analytics for absenteeism trends |
 
@@ -876,16 +841,16 @@ The following features are identified as potential enhancements for future versi
 
 | Version | Date | Author | Description |
 |---|---|---|---|
-| 0.1 | January 2026 | [Author Name] | Initial draft created |
-| 0.5 | February 2026 | [Author Name] | Functional requirements expanded |
-| 0.8 | March 2026 | [Author Name] | Non-functional requirements added |
-| 1.0 | March 2026 | [Author Name] | Final version submitted |
+| 0.1 | January 2026 | Md Azadur Rahman | Initial draft created |
+| 0.5 | February 2026 | Md Azadur Rahman, Rakib Hossain | Functional requirements expanded |
+| 0.8 | March 2026 | Aduri Akter | Non-functional requirements added; QA review |
+| 1.0 | March 2026 | Md Azadur Rahman | First submitted version |
+| 1.1 | April 2026 | Md Azadur Rahman | Refactored to match actual implementation — updated tech stack (NestJS 11, Next.js 16, Prisma 5, PostgreSQL), three-role model (Admin/Manager/Employee), real Prisma schema, removed unimplemented features (notification table, leave balance table, OTP reset, CSV import) |
 
 ---
 
 *End of Software Requirements Specification*
 
-*Document prepared in accordance with IEEE Std 830-1998 for academic submission.*
-*© 2026 — [Your University Name] — Department of Computer Science and Engineering*
-
-
+*Prepared by: Md Azadur Rahman (4478) · Rakib Hossain (4056) · Aduri Akter (4032)*
+*Department of Computer Science and Engineering · April 2026*
+*IEEE Std 830-1998 compliant — prepared for academic submission.*
