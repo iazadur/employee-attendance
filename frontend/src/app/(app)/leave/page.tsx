@@ -16,6 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const leaveTypes = [
   "ANNUAL",
@@ -52,11 +60,16 @@ export default function LeavePage() {
     new Date().toISOString().slice(0, 10),
   );
   const [reason, setReason] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const rows = useMemo(() => {
     if (canReview) return allLeave.data ?? [];
     return myLeave.data ?? [];
   }, [canReview, allLeave.data, myLeave.data]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const pageRows = rows.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
@@ -154,8 +167,8 @@ export default function LeavePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.length ? (
-              rows.map((r) => (
+            {pageRows.length ? (
+              pageRows.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">{r.leaveType}</TableCell>
                   <TableCell>{new Date(r.startDate).toLocaleDateString()}</TableCell>
@@ -215,6 +228,37 @@ export default function LeavePage() {
           </TableBody>
         </Table>
       </div>
+
+      {rows.length ? (
+        <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
+          <div className="text-sm text-muted-foreground">
+            Showing{" "}
+            <span className="font-medium text-foreground">
+              {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, rows.length)}
+            </span>{" "}
+            of <span className="font-medium text-foreground">{rows.length}</span>
+          </div>
+          <Pagination className="mx-0 w-auto justify-end">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive>{page}</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      ) : null}
     </div>
   );
 }

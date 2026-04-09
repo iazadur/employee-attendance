@@ -9,9 +9,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function EmployeesPage() {
-  const employees = useListEmployeesQuery({ take: 50 });
+  const [page, setPage] = useState(1);
+  const take = 10;
+  const skip = (page - 1) * take;
+  const employees = useListEmployeesQuery({ take, skip });
   const shifts = useListShiftsQuery();
   const [createEmployee, createState] = useCreateEmployeeMutation();
   const [open, setOpen] = useState(false);
@@ -26,6 +37,9 @@ export default function EmployeesPage() {
     phone: "",
     shiftId: "",
   });
+
+  const total = employees.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / take));
 
   return (
     <div className="space-y-6">
@@ -191,6 +205,36 @@ export default function EmployeesPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
+        <div className="text-sm text-muted-foreground">
+          Showing{" "}
+          <span className="font-medium text-foreground">
+            {total ? skip + 1 : 0}–{Math.min(skip + take, total)}
+          </span>{" "}
+          of <span className="font-medium text-foreground">{total}</span>
+        </div>
+
+        <Pagination className="mx-0 w-auto justify-end">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>{page}</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

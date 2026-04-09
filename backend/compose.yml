@@ -1,14 +1,16 @@
 services:
   backend:
+    image: iazadur/attendance:latest
+    container_name: attendance-backend
     build:
       context: .
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: unless-stopped
     ports:
       - "3001:3001"
     env_file:
       - .env
-    environment:
-      # Set true only for local demo/dev (seed wipes & recreates demo data)
-      RUN_SEED: "true"
-
+    # Seed data will be run manually from host or a one-off container

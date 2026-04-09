@@ -22,6 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function AttendancePage() {
   const me = useMeQuery();
@@ -32,6 +40,8 @@ export default function AttendancePage() {
   const [dateFrom, setDateFrom] = useState<string>(todayIso);
   const [dateTo, setDateTo] = useState<string>(todayIso);
   const [employeeId, setEmployeeId] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const employees = useListEmployeesQuery(
     { take: 100 },
@@ -47,6 +57,10 @@ export default function AttendancePage() {
         }
       : undefined,
   );
+
+  const allRows = attendance.data ?? [];
+  const totalPages = Math.max(1, Math.ceil(allRows.length / pageSize));
+  const pageRows = allRows.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
@@ -116,8 +130,8 @@ export default function AttendancePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {attendance.data?.length ? (
-              attendance.data.map((r) => (
+            {pageRows.length ? (
+              pageRows.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">
                     {new Date(r.date).toLocaleDateString()}
@@ -152,6 +166,37 @@ export default function AttendancePage() {
           </TableBody>
         </Table>
       </div>
+
+      {allRows.length ? (
+        <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
+          <div className="text-sm text-muted-foreground">
+            Showing{" "}
+            <span className="font-medium text-foreground">
+              {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, allRows.length)}
+            </span>{" "}
+            of <span className="font-medium text-foreground">{allRows.length}</span>
+          </div>
+          <Pagination className="mx-0 w-auto justify-end">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive>{page}</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      ) : null}
     </div>
   );
 }

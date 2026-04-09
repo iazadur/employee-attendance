@@ -32,15 +32,16 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
+# Copy built app and node_modules from deps, then prune dev deps
+COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm prune --omit=dev
 
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist ./dist
 
 EXPOSE 3001
 
-# Run migrations, optionally seed, then start API
-# NOTE: seed is destructive (dev/demo only). Enable with RUN_SEED=true
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$RUN_SEED\" = \"true\" ]; then npm run db:seed:docker; fi && node dist/main"]
+# Run migrations then start API (no auto seed inside image)
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
 

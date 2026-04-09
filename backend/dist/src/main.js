@@ -10,9 +10,8 @@ const common_1 = require("@nestjs/common");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    const frontendOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000';
     app.enableCors({
-        origin: [frontendOrigin],
+        origin: ['https://attendance.azadur.com.bd', 'http://localhost:3000'],
         credentials: true,
     });
     app.use((0, cookie_parser_1.default)());
