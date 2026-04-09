@@ -28,7 +28,11 @@ import { ChartSectionCard } from "@/components/sections/ChartSectionCard";
 import { PageSectionHeader } from "@/components/sections/PageSectionHeader";
 
 const createShiftSchema = z.object({
-  name: z.string().trim().min(2, "Shift name must be at least 2 characters"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Shift name is required")
+    .min(2, "Shift name must be at least 2 characters"),
   startTime: z.string().trim().min(1, "Start time is required"),
   endTime: z.string().trim().min(1, "End time is required"),
   workingDays: z.string().trim().min(1, "Working days are required"),
@@ -42,6 +46,13 @@ export default function ShiftsPage() {
   const [createShift, createState] = useCreateShiftMutation();
   const [open, setOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const fieldLabels: Record<keyof CreateShiftFormValues, string> = {
+    name: "Name",
+    startTime: "Start",
+    endTime: "End",
+    workingDays: "Working days",
+    graceMinutes: "Grace minutes",
+  };
   const form = useForm<CreateShiftFormValues>({
     resolver: zodResolver(createShiftSchema),
     defaultValues: {
@@ -95,6 +106,19 @@ export default function ShiftsPage() {
     }
   }
 
+  function onInvalid(errors: Partial<Record<keyof CreateShiftFormValues, unknown>>) {
+    const errorKeys = Object.keys(errors) as Array<keyof CreateShiftFormValues>;
+    const fieldList = errorKeys.map((key) => fieldLabels[key]).join(", ");
+    setSubmitError(
+      fieldList
+        ? `Please complete or correct: ${fieldList}.`
+        : "Please complete all required fields.",
+    );
+    if (errorKeys.length > 0) {
+      form.setFocus(errorKeys[0]);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageSectionHeader
@@ -117,13 +141,13 @@ export default function ShiftsPage() {
               <DialogTitle>New shift</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Name *</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Morning" />
                       </FormControl>
@@ -137,7 +161,7 @@ export default function ShiftsPage() {
                     name="startTime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Start</FormLabel>
+                        <FormLabel>Start *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="09:00" />
                         </FormControl>
@@ -150,7 +174,7 @@ export default function ShiftsPage() {
                     name="endTime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>End</FormLabel>
+                        <FormLabel>End *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="17:00" />
                         </FormControl>
@@ -164,7 +188,7 @@ export default function ShiftsPage() {
                   name="workingDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Working days</FormLabel>
+                      <FormLabel>Working days *</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Mon,Tue,Wed,Thu,Fri" />
                       </FormControl>
@@ -180,7 +204,7 @@ export default function ShiftsPage() {
                   name="graceMinutes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Grace minutes</FormLabel>
+                      <FormLabel>Grace minutes *</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -203,7 +227,7 @@ export default function ShiftsPage() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={createState.isLoading || !form.formState.isValid}
+                  disabled={createState.isLoading}
                 >
                   {createState.isLoading ? "Creating..." : "Create shift"}
                 </Button>

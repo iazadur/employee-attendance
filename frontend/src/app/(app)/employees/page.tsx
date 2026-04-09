@@ -33,10 +33,19 @@ import { ChartSectionCard } from "@/components/sections/ChartSectionCard";
 import { PageSectionHeader } from "@/components/sections/PageSectionHeader";
 
 const createEmployeeSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address"),
-  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Enter a valid email address"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .min(2, "Name must be at least 2 characters"),
   password: z
     .string()
+    .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must include at least one uppercase letter")
     .regex(/[a-z]/, "Password must include at least one lowercase letter")
@@ -59,12 +68,22 @@ export default function EmployeesPage() {
   const [createEmployee, createState] = useCreateEmployeeMutation();
   const [open, setOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const fieldLabels: Record<keyof CreateEmployeeFormValues, string> = {
+    email: "Email",
+    name: "Name",
+    password: "Password",
+    department: "Department",
+    designation: "Designation",
+    joinDate: "Join date",
+    phone: "Phone",
+    shiftId: "Shift ID",
+  };
   const form = useForm<CreateEmployeeFormValues>({
     resolver: zodResolver(createEmployeeSchema),
     defaultValues: {
       email: "",
       name: "",
-      password: "Asdf@123",
+      password: "",
       department: "",
       designation: "",
       joinDate: new Date().toISOString().slice(0, 10),
@@ -113,7 +132,7 @@ export default function EmployeesPage() {
       form.reset({
         email: "",
         name: "",
-        password: "Asdf@123",
+        password: "",
         department: "",
         designation: "",
         joinDate: new Date().toISOString().slice(0, 10),
@@ -125,6 +144,20 @@ export default function EmployeesPage() {
       const message = getApiErrorMessage(error);
       setSubmitError(message);
       toast.error(message);
+    }
+  }
+
+  function onInvalid(errors: Partial<Record<keyof CreateEmployeeFormValues, unknown>>) {
+    const errorKeys = Object.keys(errors) as Array<keyof CreateEmployeeFormValues>;
+    const requiredFields = errorKeys.filter((key) => key !== "shiftId");
+    const fieldList = requiredFields.map((key) => fieldLabels[key]).join(", ");
+    setSubmitError(
+      fieldList
+        ? `Please complete or correct: ${fieldList}.`
+        : "Please complete all required fields.",
+    );
+    if (errorKeys.length > 0) {
+      form.setFocus(errorKeys[0]);
     }
   }
 
@@ -150,13 +183,13 @@ export default function EmployeesPage() {
               <DialogTitle>New employee</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+              <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email *</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="employee@company.com" />
                       </FormControl>
@@ -169,7 +202,7 @@ export default function EmployeesPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Name *</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Employee Name" />
                       </FormControl>
@@ -182,7 +215,7 @@ export default function EmployeesPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Password *</FormLabel>
                       <FormControl>
                         <Input {...field} type="password" />
                       </FormControl>
@@ -199,7 +232,7 @@ export default function EmployeesPage() {
                     name="department"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Department</FormLabel>
+                        <FormLabel>Department *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="IT" />
                         </FormControl>
@@ -212,7 +245,7 @@ export default function EmployeesPage() {
                     name="designation"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Designation</FormLabel>
+                        <FormLabel>Designation *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Developer" />
                         </FormControl>
@@ -227,7 +260,7 @@ export default function EmployeesPage() {
                     name="joinDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Join date</FormLabel>
+                        <FormLabel>Join date *</FormLabel>
                         <FormControl>
                           <Input {...field} type="date" />
                         </FormControl>
@@ -240,7 +273,7 @@ export default function EmployeesPage() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone</FormLabel>
+                        <FormLabel>Phone *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="01XXXXXXXXX" />
                         </FormControl>
@@ -278,7 +311,7 @@ export default function EmployeesPage() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={createState.isLoading || !form.formState.isValid}
+                  disabled={createState.isLoading}
                 >
                   {createState.isLoading ? "Creating..." : "Create employee"}
                 </Button>

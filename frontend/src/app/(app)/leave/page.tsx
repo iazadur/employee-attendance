@@ -58,7 +58,11 @@ const leaveRequestSchema = z
     leaveType: z.enum(leaveTypes, { message: "Select leave type" }),
     startDate: z.string().min(1, "Start date is required"),
     endDate: z.string().min(1, "End date is required"),
-    reason: z.string().trim().min(3, "Reason must be at least 3 characters"),
+    reason: z
+      .string()
+      .trim()
+      .min(1, "Reason is required")
+      .min(3, "Reason must be at least 3 characters"),
   })
   .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: "End date must be same or after start date",
@@ -80,6 +84,12 @@ export default function LeavePage() {
 
   const [open, setOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const fieldLabels: Record<keyof LeaveRequestFormValues, string> = {
+    leaveType: "Leave type",
+    startDate: "Start date",
+    endDate: "End date",
+    reason: "Reason",
+  };
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const leaveForm = useForm<LeaveRequestFormValues>({
@@ -143,6 +153,19 @@ export default function LeavePage() {
     }
   }
 
+  function onInvalid(errors: Partial<Record<keyof LeaveRequestFormValues, unknown>>) {
+    const errorKeys = Object.keys(errors) as Array<keyof LeaveRequestFormValues>;
+    const fieldList = errorKeys.map((key) => fieldLabels[key]).join(", ");
+    setSubmitError(
+      fieldList
+        ? `Please complete or correct: ${fieldList}.`
+        : "Please complete all required fields.",
+    );
+    if (errorKeys.length > 0) {
+      leaveForm.setFocus(errorKeys[0]);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageSectionHeader
@@ -168,14 +191,14 @@ export default function LeavePage() {
               <Form {...leaveForm}>
                 <form
                   className="space-y-4"
-                  onSubmit={leaveForm.handleSubmit(handleLeaveSubmit)}
+                  onSubmit={leaveForm.handleSubmit(handleLeaveSubmit, onInvalid)}
                 >
                   <FormField
                     control={leaveForm.control}
                     name="leaveType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Leave type</FormLabel>
+                        <FormLabel>Leave type *</FormLabel>
                         <FormControl>
                           <Select
                             value={field.value}
@@ -205,7 +228,7 @@ export default function LeavePage() {
                       name="startDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Start</FormLabel>
+                          <FormLabel>Start *</FormLabel>
                           <FormControl>
                             <Input {...field} type="date" />
                           </FormControl>
@@ -218,7 +241,7 @@ export default function LeavePage() {
                       name="endDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>End</FormLabel>
+                          <FormLabel>End *</FormLabel>
                           <FormControl>
                             <Input {...field} type="date" />
                           </FormControl>
@@ -232,7 +255,7 @@ export default function LeavePage() {
                     name="reason"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Reason</FormLabel>
+                        <FormLabel>Reason *</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Reason..." />
                         </FormControl>
@@ -248,7 +271,7 @@ export default function LeavePage() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={createState.isLoading || !leaveForm.formState.isValid}
+                    disabled={createState.isLoading}
                   >
                     {createState.isLoading ? "Submitting..." : "Submit request"}
                   </Button>

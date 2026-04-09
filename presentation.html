@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Attendance System — Lab Final Presentation</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+    --accent: #06b6d4;
+    --bg: #0f172a;
+    --bg-card: rgba(30, 41, 59, 0.7);
+    --bg-card-solid: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: rgba(148, 163, 184, 0.15);
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --radius: 16px;
+    --transition: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  /* ===== Progress Bar ===== */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; z-index: 100;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width var(--transition);
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ===== Slide Counter ===== */
+  .slide-counter {
+    position: fixed; bottom: 24px; right: 32px; z-index: 100;
+    font-size: 0.8rem; color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== Slides Container ===== */
+  .slides-wrapper {
+    position: relative; width: 100%; height: 100vh;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 48px 64px;
+    opacity: 0;
+    transform: translateX(60px);
+    pointer-events: none;
+    transition: opacity var(--transition), transform var(--transition);
+    will-change: opacity, transform;
+  }
+  .slide.active {
+    opacity: 1; transform: translateX(0); pointer-events: auto;
+  }
+  .slide.exit-left {
+    opacity: 0; transform: translateX(-60px); pointer-events: none;
+  }
+
+  /* ===== Typography ===== */
+  .slide-tag {
+    display: inline-block;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    padding: 4px 14px; border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
+    line-height: 1.15; letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 700;
+    line-height: 1.2; margin-bottom: 12px; text-align: center;
+  }
+  h3 {
+    font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: clamp(1rem, 2vw, 1.35rem); color: var(--text-muted);
+    font-weight: 400;
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary-light), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===== Content Layouts ===== */
+  .slide-content {
+    width: 100%; max-width: 1000px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    width: 100%; margin-top: 24px;
+  }
+  .three-col {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    width: 100%; margin-top: 24px;
+  }
+
+  /* ===== Cards ===== */
+  .card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.12);
+  }
+  .card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-bottom: 12px;
+  }
+  .icon-blue   { background: rgba(99,102,241,0.15); color: var(--primary-light); }
+  .icon-cyan   { background: rgba(6,182,212,0.15);  color: var(--accent); }
+  .icon-green  { background: rgba(34,197,94,0.15);  color: var(--success); }
+  .icon-amber  { background: rgba(245,158,11,0.15); color: var(--warning); }
+  .icon-red    { background: rgba(239,68,68,0.15);  color: var(--danger); }
+
+  .card h3 { font-size: 1rem; }
+  .card p  { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ===== Lists ===== */
+  .feature-list {
+    list-style: none; width: 100%;
+    display: flex; flex-direction: column; gap: 10px;
+    margin-top: 20px;
+  }
+  .feature-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 0.95rem; line-height: 1.6; color: var(--text);
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .feature-list li .bullet {
+    flex-shrink: 0; width: 22px; height: 22px;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; margin-top: 2px;
+  }
+
+  /* ===== Diagrams ===== */
+  .diagram-two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    width: 100%; margin-top: 20px;
+  }
+  .diagram-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+  }
+  .diagram-card h3 { font-size: 0.95rem; margin-bottom: 4px; }
+  .diagram-card p  { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+  .diagram-embed {
+    width: 100%; height: 380px; border-radius: 10px; border: none;
+    background: #fff;
+  }
+
+  /* ===== Screenshot Slides ===== */
+  .screen-grid-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    width: 100%; margin-top: 20px;
+  }
+  .screen-grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    width: 100%; margin-top: 20px;
+  }
+  .screen-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .screen-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(99,102,241,0.18);
+  }
+  .screen-card img {
+    width: 100%; display: block; object-fit: cover;
+    border-bottom: 1px solid var(--border);
+  }
+  .screen-card-label {
+    padding: 8px 12px; font-size: 0.78rem; font-weight: 600;
+    color: var(--text-muted); text-align: center; text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .screen-hero {
+    width: 100%; max-width: 860px; margin-top: 20px;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 48px rgba(99,102,241,0.2);
+  }
+  .screen-hero img { width: 100%; display: block; }
+
+  /* ===== Tech Stack Badges ===== */
+  .tech-badges {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center; margin-top: 20px;
+  }
+  .badge {
+    padding: 6px 16px; border-radius: 100px; font-size: 0.8rem;
+    font-weight: 500; border: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .badge-fe  { color: var(--primary-light); border-color: rgba(99,102,241,0.3); }
+  .badge-be  { color: var(--accent);        border-color: rgba(6,182,212,0.3); }
+  .badge-db  { color: var(--success);       border-color: rgba(34,197,94,0.3); }
+  .badge-dev { color: var(--warning);       border-color: rgba(245,158,11,0.3); }
+
+  /* ===== Links ===== */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border-radius: 10px; border: none;
+    background: var(--primary); color: #fff;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    text-decoration: none; z-index: 1;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border-radius: 10px;
+    background: var(--bg-card-solid); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.9rem; font-weight: 600;
+    text-decoration: none; z-index: 1;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(99,102,241,0.12); transform: translateY(-1px); }
+
+  /* ===== Challenge Cards ===== */
+  .challenge-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    margin-top: 16px; width: 100%;
+  }
+  .challenge-card .problem {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .challenge-card .solution {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .challenge-card .label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; flex-shrink: 0; padding: 2px 8px;
+    border-radius: 4px; margin-top: 1px;
+  }
+  .label-problem { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .label-solution { background: rgba(34,197,94,0.15); color: var(--success); }
+  .challenge-card .text { font-size: 0.9rem; line-height: 1.55; }
+
+  /* ===== Team Member ===== */
+  .member-card {
+    text-align: center; padding: 32px 20px;
+  }
+  .avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem; font-weight: 700; color: #fff;
+    margin: 0 auto 14px;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+  }
+  .avatar-green { background: linear-gradient(135deg, #22c55e, #06b6d4); }
+  .avatar-amber { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .member-card h3 { font-size: 1.05rem; }
+  .member-card .id { font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 8px; }
+  .role-tag {
+    display: inline-block; padding: 4px 14px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 600;
+    background: rgba(99,102,241,0.12); color: var(--primary-light);
+    border: 1px solid rgba(99,102,241,0.2);
+    margin-top: 4px;
+  }
+  .role-tag-green { background: rgba(34,197,94,0.1); color: var(--success); border-color: rgba(34,197,94,0.2); }
+  .role-tag-amber { background: rgba(245,158,11,0.1); color: var(--warning); border-color: rgba(245,158,11,0.2); }
+
+  /* ===== Navigation ===== */
+  .nav-controls {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    z-index: 100;
+  }
+  .nav-btn {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--bg-card-solid); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-btn:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:disabled:hover { background: var(--bg-card-solid); border-color: var(--border); }
+  .nav-dots {
+    display: flex; gap: 6px; padding: 0 8px;
+  }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(148,163,184,0.3); border: none; cursor: pointer;
+    transition: background 0.25s, transform 0.25s;
+  }
+  .nav-dot.active {
+    background: var(--primary-light);
+    transform: scale(1.3);
+  }
+
+  /* ===== Title Slide Extras ===== */
+  .title-slide h1 { text-align: center; }
+  .title-meta {
+    margin-top: 28px; display: flex; flex-direction: column;
+    align-items: center; gap: 6px; color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .title-meta span { display: flex; align-items: center; gap: 6px; }
+  .decoration {
+    position: absolute; border-radius: 50%; filter: blur(80px);
+    pointer-events: none; opacity: 0.12;
+  }
+  .deco-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; right: -100px; }
+  .deco-2 { width: 300px; height: 300px; background: var(--accent); bottom: -80px; left: -80px; }
+
+  /* ===== Architecture Mini-Diagram ===== */
+  .arch-diagram {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-top: 24px; flex-wrap: wrap;
+  }
+  .arch-node {
+    padding: 12px 20px; border-radius: 10px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    font-size: 0.85rem; font-weight: 600;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .arch-node small { font-weight: 400; color: var(--text-muted); font-size: 0.7rem; }
+  .arch-arrow { color: var(--text-muted); font-size: 1.2rem; }
+
+  /* ===== Conclusion ===== */
+  .future-list {
+    list-style: none; display: flex; flex-direction: column; gap: 8px;
+    margin-top: 12px;
+  }
+  .future-list li {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.9rem; color: var(--text-muted);
+  }
+  .future-list li::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+
+  /* ===== Links Slide ===== */
+  .link-row {
+    display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap; justify-content: center;
+  }
+  .qr-placeholder {
+    width: 120px; height: 120px; border-radius: 12px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 0.75rem;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .slide { padding: 32px 24px; }
+    .two-col, .three-col, .diagram-two-col, .screen-grid-3, .screen-grid-2 { grid-template-columns: 1fr; }
+    .nav-controls { bottom: 16px; }
+    .slide-counter { bottom: 16px; right: 16px; }
+  }
+  @media (max-width: 480px) {
+    .slide { padding: 24px 16px; }
+    h1 { font-size: 1.8rem; }
+  }
+
+  /* ===== Print ===== */
+  @media print {
+    .slide { page-break-after: always; position: relative;
+      opacity: 1; transform: none; height: 100vh; }
+    .nav-controls, .progress-bar, .slide-counter { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Slide Counter -->
+<div class="slide-counter" id="slideCounter"></div>
+
+<!-- ==================== SLIDES ==================== -->
+<div class="slides-wrapper" id="slidesWrapper">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide active title-slide" data-slide="0">
+    <div class="decoration deco-1"></div>
+    <div class="decoration deco-2"></div>
+    <div class="slide-content">
+      <span class="slide-tag">Lab Final Presentation · 2026</span>
+      <h1><span class="gradient-text">Employee Attendance System</span></h1>
+      <p class="subtitle">A Full-Stack Attendance Management Platform</p>
+      <div class="title-meta">
+        <span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Md Azadur Rahman &nbsp;·&nbsp; Rakib Hossain &nbsp;·&nbsp; Aduri Akter
+        </span>
+        <span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg>
+          IDs: 4478 &nbsp;·&nbsp; 4056 &nbsp;·&nbsp; 4032
+        </span>
+      </div>
+      <div class="tech-badges" style="margin-top:28px;">
+        <span class="badge badge-fe">Next.js 16</span>
+        <span class="badge badge-be">NestJS 11</span>
+        <span class="badge badge-db">PostgreSQL</span>
+        <span class="badge badge-dev">Prisma ORM</span>
+        <span class="badge badge-fe">React 19</span>
+        <span class="badge badge-be">TypeScript</span>
+        <span class="badge badge-dev">Docker</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Project Overview -->
+  <div class="slide" data-slide="1">
+    <div class="slide-content">
+      <span class="slide-tag">Overview</span>
+      <h2>Project Overview</h2>
+      <p class="subtitle" style="text-align:center; max-width:640px;">
+        A web-based application that automates and digitizes employee attendance tracking, leave management, shift scheduling, and reporting for organizations.
+      </p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-icon icon-blue">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Purpose</h3>
+          <p>Replace manual paper-based attendance registers with an accurate, real-time digital system. Reduce administrative workload by 60–70%.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-cyan">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <h3>Goals</h3>
+          <p>Provide transparent leave management, automated notifications, real-time dashboards, and role-based access control (Admin, Manager, Employee).</p>
+        </div>
+      </div>
+      <div class="arch-diagram">
+        <div class="arch-node">Browser<small>User</small></div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-node" style="border-color:rgba(99,102,241,0.3);">Next.js<small>Frontend</small></div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-node" style="border-color:rgba(6,182,212,0.3);">NestJS<small>REST API</small></div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-node" style="border-color:rgba(34,197,94,0.3);">PostgreSQL<small>Database</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Team -->
+  <div class="slide" data-slide="2">
+    <div class="slide-content">
+      <span class="slide-tag">Team</span>
+      <h2>Team &amp; Roles</h2>
+      <div class="three-col">
+        <div class="card member-card">
+          <div class="avatar">MA</div>
+          <h3>Md Azadur Rahman</h3>
+          <div class="id">Student ID: 4478</div>
+          <span class="role-tag">Software Engineering</span>
+        </div>
+        <div class="card member-card">
+          <div class="avatar avatar-green">RH</div>
+          <h3>Rakib Hossain</h3>
+          <div class="id">Student ID: 4056</div>
+          <span class="role-tag role-tag-green">System Administration</span>
+        </div>
+        <div class="card member-card">
+          <div class="avatar avatar-amber">AA</div>
+          <h3>Aduri Akter</h3>
+          <div class="id">Student ID: 4032</div>
+          <span class="role-tag role-tag-amber">QA Engineer</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Functional Requirements -->
+  <div class="slide" data-slide="3">
+    <div class="slide-content">
+      <span class="slide-tag">Requirements</span>
+      <h2>Functional Requirements</h2>
+      <ul class="feature-list" style="max-width:720px;">
+        <li>
+          <span class="bullet icon-blue">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </span>
+          <span><strong>Authentication &amp; Authorization</strong> — JWT in HTTP-only cookies, role-based guards (Admin, Manager, Employee), session validation</span>
+        </li>
+        <li>
+          <span class="bullet icon-cyan">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </span>
+          <span><strong>Employee &amp; Shift Management</strong> — CRUD for employees and shifts, activate/deactivate accounts, assign shifts</span>
+        </li>
+        <li>
+          <span class="bullet icon-green">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </span>
+          <span><strong>Attendance Tracking</strong> — Check-in/check-out, status tracking (present, late, half-day, absent, on-leave, holiday)</span>
+        </li>
+        <li>
+          <span class="bullet icon-amber">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          </span>
+          <span><strong>Leave Workflow</strong> — Submit leave requests, admin/manager review (approve/reject), leave history &amp; balance tracking</span>
+        </li>
+        <li>
+          <span class="bullet icon-red">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </span>
+          <span><strong>Reports &amp; Dashboard</strong> — Today KPIs, monthly attendance summaries, chart visualizations, analytics</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Non-Functional Requirements -->
+  <div class="slide" data-slide="4">
+    <div class="slide-content">
+      <span class="slide-tag">Quality Attributes</span>
+      <h2>Non-Functional Requirements</h2>
+      <div class="three-col">
+        <div class="card">
+          <div class="card-icon icon-blue">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>Performance</h3>
+          <p>API response &lt; 500ms. Optimized queries via Prisma. Lazy-loaded frontend with Next.js code splitting.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-red">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <h3>Security</h3>
+          <p>HTTP-only cookie JWT. Password hashing with bcrypt. RBAC guards. CORS &amp; input validation (class-validator).</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-cyan">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+          </div>
+          <h3>Scalability</h3>
+          <p>Dockerized deployment. Stateless API design. Database migrations with Prisma. Modular NestJS architecture.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-green">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3>Usability</h3>
+          <p>Responsive UI (mobile + desktop). Intuitive navigation. Accessible forms with validation feedback.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-amber">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          </div>
+          <h3>Reliability</h3>
+          <p>Automated DB migrations on deploy. Error handling at API &amp; UI level. Seed data for consistent testing.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-blue">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <h3>Maintainability</h3>
+          <p>Modular codebase. TypeScript throughout. Clean separation of concerns. Comprehensive README &amp; SRS docs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Use Case Diagram -->
+  <div class="slide" data-slide="5">
+    <div class="slide-content" style="max-width:900px;">
+      <span class="slide-tag">Diagrams</span>
+      <h2>Use Case Diagram</h2>
+      <p class="subtitle" style="text-align:center; max-width:560px; margin-bottom:16px;">
+        Actor interactions with system functions across all roles
+      </p>
+      <div style="width:100%; height:430px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#fff;">
+        <embed src="attendance-use-case.drawio.pdf" type="application/pdf" width="100%" height="100%" style="border:none;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Class Diagram -->
+  <div class="slide" data-slide="6">
+    <div class="slide-content" style="max-width:900px;">
+      <span class="slide-tag">Diagrams</span>
+      <h2>Class Diagram</h2>
+      <p class="subtitle" style="text-align:center; max-width:560px; margin-bottom:16px;">
+        Domain models, attributes, and relationships between entities
+      </p>
+      <div style="width:100%; height:430px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#fff;">
+        <embed src="attendance-class-diagram.drawio.pdf" type="application/pdf" width="100%" height="100%" style="border:none;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Screenshots — Dashboard & Employees -->
+  <div class="slide" data-slide="7">
+    <div class="slide-content" style="max-width:1000px;">
+      <span class="slide-tag">Application Screens</span>
+      <h2>Dashboard &amp; Employees</h2>
+      <div class="screen-grid-2">
+        <div class="screen-card">
+          <img src="screens/Dashboard.png" alt="Dashboard" />
+          <div class="screen-card-label">📊 Dashboard — KPIs &amp; Overview</div>
+        </div>
+        <div class="screen-card">
+          <img src="screens/Employees.png" alt="Employees" />
+          <div class="screen-card-label">👥 Employees — Management</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Screenshots — Attendance & Leave -->
+  <div class="slide" data-slide="8">
+    <div class="slide-content" style="max-width:1000px;">
+      <span class="slide-tag">Application Screens</span>
+      <h2>Attendance &amp; Leave</h2>
+      <div class="screen-grid-2">
+        <div class="screen-card">
+          <img src="screens/Attendance.png" alt="Attendance" />
+          <div class="screen-card-label">🕐 Attendance — Check-in / Check-out</div>
+        </div>
+        <div class="screen-card">
+          <img src="screens/Leave.png" alt="Leave" />
+          <div class="screen-card-label">📅 Leave — Requests &amp; Approvals</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: Screenshots — Shift & Reports -->
+  <div class="slide" data-slide="9">
+    <div class="slide-content" style="max-width:1000px;">
+      <span class="slide-tag">Application Screens</span>
+      <h2>Shifts &amp; Reports</h2>
+      <div class="screen-grid-2">
+        <div class="screen-card">
+          <img src="screens/Shift.png" alt="Shift" />
+          <div class="screen-card-label">🔄 Shifts — Schedule Management</div>
+        </div>
+        <div class="screen-card">
+          <img src="screens/Reports.png" alt="Reports" />
+          <div class="screen-card-label">📈 Reports — Analytics &amp; Charts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: Testing -->
+  <div class="slide" data-slide="10">
+    <div class="slide-content">
+      <span class="slide-tag">Testing</span>
+      <h2>Testing Strategy</h2>
+      <div class="three-col">
+        <div class="card" style="border-top:3px solid var(--primary);">
+          <div class="card-icon icon-blue">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <h3>Unit Testing</h3>
+          <p>Individual service methods tested in isolation. NestJS <code>jest</code> specs for auth, attendance, and leave services. Mocked dependencies.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--accent);">
+          <div class="card-icon icon-cyan">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          </div>
+          <h3>Integration Testing</h3>
+          <p>API endpoint testing with <code>supertest</code>. Real database interactions via Prisma. Auth flow, attendance check-in/out, leave review cycles.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--success);">
+          <div class="card-icon icon-green">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          </div>
+          <h3>System Testing</h3>
+          <p>End-to-end workflow validation across all roles (Admin, Manager, Employee). UI responsiveness checks. Manual testing with seed data.</p>
+        </div>
+      </div>
+      <div class="tech-badges" style="margin-top:20px;">
+        <span class="badge badge-be">Jest</span>
+        <span class="badge badge-be">Supertest</span>
+        <span class="badge badge-fe">Postman</span>
+        <span class="badge badge-db">Seed Data (36 users)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: Challenges -->
+  <div class="slide" data-slide="11">
+    <div class="slide-content">
+      <span class="slide-tag">Challenges</span>
+      <h2>Challenges &amp; Solutions</h2>
+      <div style="width:100%; max-width:720px; display:flex; flex-direction:column; gap:16px;">
+        <div class="challenge-card">
+          <div class="problem">
+            <span class="label label-problem">Problem</span>
+            <span class="text">JWT authentication across frontend and backend with cookie-based sessions and CORS configuration</span>
+          </div>
+          <div class="solution">
+            <span class="label label-solution">Solution</span>
+            <span class="text">Implemented HTTP-only cookie strategy with Passport JS, proper CORS credentials, and session validation endpoint (<code>/auth/me</code>)</span>
+          </div>
+        </div>
+        <div class="challenge-card">
+          <div class="problem">
+            <span class="label label-problem">Problem</span>
+            <span class="text">Complex role-based access control across multiple user types with different permissions</span>
+          </div>
+          <div class="solution">
+            <span class="label label-solution">Solution</span>
+            <span class="text">Built NestJS custom guards and decorators for RBAC, with role-aware frontend routing and conditional UI rendering</span>
+          </div>
+        </div>
+        <div class="challenge-card">
+          <div class="problem">
+            <span class="label label-problem">Problem</span>
+            <span class="text">Dockerized deployment with automated database migrations and environment configuration</span>
+          </div>
+          <div class="solution">
+            <span class="label label-solution">Solution</span>
+            <span class="text">Created entrypoint script that runs <code>prisma migrate deploy</code> on startup. Externalized config via <code>.env</code> files and Docker Compose</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: Links & Demo -->
+  <div class="slide" data-slide="12">
+    <div class="slide-content">
+      <span class="slide-tag">Demo &amp; Source</span>
+      <h2>Live Demo &amp; Source Code</h2>
+      <p class="subtitle" style="text-align:center; max-width:560px;">
+        The system is fully deployed and accessible online.
+      </p>
+      <div class="two-col" style="max-width:680px; margin-top:28px;">
+        <div class="card" style="text-align:center; border-top:3px solid var(--accent);">
+          <div class="card-icon icon-cyan" style="margin:0 auto 12px;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </div>
+          <h3>Live Application</h3>
+          <p style="margin-bottom:14px;">Deployed and running in production</p>
+          <a href="http://attendance.azadur.com.bd/" class="btn-primary" target="_blank" rel="noopener">
+            Open Live App
+          </a>
+          <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">attendance.azadur.com.bd</div>
+        </div>
+        <div class="card" style="text-align:center; border-top:3px solid var(--primary);">
+          <div class="card-icon icon-blue" style="margin:0 auto 12px;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+          </div>
+          <h3>Source Code</h3>
+          <p style="margin-bottom:14px;">Full codebase on GitHub</p>
+          <a href="https://github.com/iazadur/employee-attendance" class="btn-ghost" target="_blank" rel="noopener">
+            View on GitHub
+          </a>
+          <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">github.com/iazadur/employee-attendance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 14: Conclusion -->
+  <div class="slide" data-slide="13">
+    <div class="slide-content">
+      <span class="slide-tag">Conclusion</span>
+      <h2>Conclusion &amp; Future Work</h2>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-icon icon-green">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <h3>Summary</h3>
+          <p>Built a production-grade attendance management system with secure auth, role-based access, attendance tracking, leave workflow, shift management, reporting dashboards, and a modern responsive UI.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-amber">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>Future Improvements</h3>
+          <ul class="future-list">
+            <li>Biometric device integration</li>
+            <li>Payroll &amp; salary calculation module</li>
+            <li>Multi-organization tenancy support</li>
+            <li>Push notifications (email/SMS)</li>
+            <li>Mobile app (React Native)</li>
+            <li>Geo-fenced check-in</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top:36px; text-align:center;">
+        <p style="font-size:1.4rem; font-weight:700;" class="gradient-text">Thank You!</p>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-top:6px;">Questions &amp; Discussion Welcome</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Navigation Controls ===== -->
+<div class="nav-controls">
+  <button class="nav-btn" id="prevBtn" disabled aria-label="Previous slide">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn" id="nextBtn" aria-label="Next slide">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const progressBar = document.getElementById('progressBar');
+  const slideCounter = document.getElementById('slideCounter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const dotsContainer = document.getElementById('navDots');
+
+  // Build nav dots
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+  const dots = dotsContainer.querySelectorAll('.nav-dot');
+
+  function updateUI() {
+    progressBar.style.width = ((current + 1) / total * 100) + '%';
+    slideCounter.textContent = (current + 1) + ' / ' + total;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= total || index === current) return;
+    const direction = index > current ? 1 : -1;
+    slides[current].classList.remove('active');
+    if (direction > 0) {
+      slides[current].classList.add('exit-left');
+    } else {
+      slides[current].style.transform = 'translateX(60px)';
+      slides[current].classList.remove('exit-left');
+    }
+    slides[index].classList.remove('exit-left');
+    slides[index].style.transform = '';
+
+    requestAnimationFrame(() => {
+      slides[current].classList.remove('active');
+      slides[index].classList.add('active');
+      current = index;
+      updateUI();
+    });
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    else if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 60) {
+      diff < 0 ? next() : prev();
+    }
+  }, { passive: true });
+
+  // Initialize
+  updateUI();
+})();
+</script>
+</body>
+</html>

@@ -22,8 +22,15 @@ import {
 } from "@/components/ui/form";
 
 const schema = z.object({
-  email: z.string().trim().email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Enter a valid email address"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(6, "Password must be at least 6 characters"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -34,6 +41,10 @@ export default function LoginPage() {
   const [login, loginState] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const fieldLabels: Record<keyof FormValues, string> = {
+    email: "Email",
+    password: "Password",
+  };
 
   const defaultValues = useMemo<FormValues>(
     () => ({ email: "", password: "" }),
@@ -67,6 +78,19 @@ export default function LoginPage() {
       }
       setSubmitError(message);
       toast.error(message);
+    }
+  }
+
+  function onInvalid(errors: Partial<Record<keyof FormValues, unknown>>) {
+    const errorKeys = Object.keys(errors) as Array<keyof FormValues>;
+    const fieldList = errorKeys.map((key) => fieldLabels[key]).join(", ");
+    setSubmitError(
+      fieldList
+        ? `Please complete or correct: ${fieldList}.`
+        : "Please complete all required fields.",
+    );
+    if (errorKeys.length > 0) {
+      form.setFocus(errorKeys[0]);
     }
   }
 
@@ -111,13 +135,13 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>Email *</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -136,7 +160,7 @@ export default function LoginPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>Password *</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
@@ -171,7 +195,7 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={loginState.isLoading || !form.formState.isValid}
+                    disabled={loginState.isLoading}
                   >
                     {loginState.isLoading ? "Signing in..." : "Sign in"}
                   </Button>
