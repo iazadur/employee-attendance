@@ -401,6 +401,108 @@
     h1 { font-size: 1.8rem; }
   }
 
+  /* ===== Card Entrance Animations ===== */
+  .slide .card,
+  .slide .challenge-card,
+  .slide .screen-card,
+  .slide .member-card,
+  .slide .feature-list li {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .slide.active .card,
+  .slide.active .challenge-card,
+  .slide.active .screen-card,
+  .slide.active .member-card,
+  .slide.active .feature-list li {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .slide.active .card:nth-child(1),
+  .slide.active .challenge-card:nth-child(1),
+  .slide.active .screen-card:nth-child(1),
+  .slide.active .member-card:nth-child(1),
+  .slide.active .feature-list li:nth-child(1) { transition-delay: 0.08s; }
+  .slide.active .card:nth-child(2),
+  .slide.active .challenge-card:nth-child(2),
+  .slide.active .screen-card:nth-child(2),
+  .slide.active .member-card:nth-child(2),
+  .slide.active .feature-list li:nth-child(2) { transition-delay: 0.16s; }
+  .slide.active .card:nth-child(3),
+  .slide.active .challenge-card:nth-child(3),
+  .slide.active .member-card:nth-child(3),
+  .slide.active .feature-list li:nth-child(3) { transition-delay: 0.24s; }
+  .slide.active .card:nth-child(4),
+  .slide.active .feature-list li:nth-child(4) { transition-delay: 0.32s; }
+  .slide.active .card:nth-child(5),
+  .slide.active .feature-list li:nth-child(5) { transition-delay: 0.40s; }
+  .slide.active .card:nth-child(6),
+  .slide.active .feature-list li:nth-child(6) { transition-delay: 0.48s; }
+
+  /* ===== Tech Stack Grid ===== */
+  .tech-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    width: 100%; max-width: 780px; margin-top: 24px;
+  }
+  .tech-group-title {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tech-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 10px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    margin-bottom: 8px; transition: transform 0.2s ease;
+  }
+  .tech-item:hover { transform: translateX(4px); }
+  .tech-item-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
+  }
+  .tech-item-name { font-size: 0.9rem; font-weight: 600; }
+  .tech-item-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* ===== How It Works Steps ===== */
+  .steps-flow {
+    display: flex; align-items: flex-start; justify-content: center;
+    gap: 8px; flex-wrap: wrap; margin-top: 24px; width: 100%; max-width: 900px;
+  }
+  .step-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; width: 130px; text-align: center;
+  }
+  .step-number {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700; color: #fff;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
+  }
+  .step-item h4 { font-size: 0.85rem; font-weight: 600; }
+  .step-item p { font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; }
+  .step-arrow {
+    color: var(--text-muted); font-size: 1.2rem; margin-top: 12px;
+  }
+  @media (max-width: 768px) {
+    .tech-grid { grid-template-columns: 1fr; }
+    .steps-flow { gap: 4px; }
+    .step-item { width: 100px; }
+    .step-arrow { display: none; }
+  }
+
+  /* ===== Speaker Indicator ===== */
+  .speaker-badge {
+    position: fixed; bottom: 24px; left: 32px; z-index: 100;
+    font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+    background: var(--bg-card-solid); border: 1px solid var(--border);
+    padding: 4px 14px; border-radius: 100px;
+    transition: all 0.3s ease;
+  }
+
   /* ===== Print ===== */
   @media print {
     .slide { page-break-after: always; position: relative;
@@ -417,11 +519,14 @@
 <!-- Slide Counter -->
 <div class="slide-counter" id="slideCounter"></div>
 
+<!-- Speaker Badge -->
+<div class="speaker-badge" id="speakerBadge">Speaker: Azadur</div>
+
 <!-- ==================== SLIDES ==================== -->
 <div class="slides-wrapper" id="slidesWrapper">
 
   <!-- SLIDE 1: Title -->
-  <div class="slide active title-slide" data-slide="0">
+  <div class="slide active title-slide" data-slide="0" data-speaker="Azadur">
     <div class="decoration deco-1"></div>
     <div class="decoration deco-2"></div>
     <div class="slide-content">
@@ -451,7 +556,7 @@
   </div>
 
   <!-- SLIDE 2: Project Overview -->
-  <div class="slide" data-slide="1">
+  <div class="slide" data-slide="1" data-speaker="Azadur">
     <div class="slide-content">
       <span class="slide-tag">Overview</span>
       <h2>Project Overview</h2>
@@ -487,7 +592,7 @@
   </div>
 
   <!-- SLIDE 3: Team -->
-  <div class="slide" data-slide="2">
+  <div class="slide" data-slide="2" data-speaker="Azadur">
     <div class="slide-content">
       <span class="slide-tag">Team</span>
       <h2>Team &amp; Roles</h2>
@@ -514,8 +619,63 @@
     </div>
   </div>
 
-  <!-- SLIDE 4: Functional Requirements -->
-  <div class="slide" data-slide="3">
+  <!-- SLIDE 4: Technology Stack -->
+  <div class="slide" data-slide="3" data-speaker="Azadur">
+    <div class="slide-content">
+      <span class="slide-tag">Tech Stack</span>
+      <h2>Technology Stack</h2>
+      <p class="subtitle" style="text-align:center; max-width:520px;">
+        Modern, battle-tested tools chosen for reliability, developer experience, and production readiness.
+      </p>
+      <div class="tech-grid">
+        <div class="card">
+          <div class="tech-group-title">Frontend</div>
+          <div class="tech-item">
+            <div class="tech-item-icon icon-blue">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div><div class="tech-item-name">Next.js 16</div><div class="tech-item-desc">App Router, SSR, Code Splitting</div></div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-item-icon icon-cyan">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2a10 10 0 010 20M2 12h4m12 0h4"/></svg>
+            </div>
+            <div><div class="tech-item-name">React 19 + TypeScript</div><div class="tech-item-desc">Component UI with type safety</div></div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-item-icon icon-green">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div><div class="tech-item-name">Tailwind CSS + shadcn/ui</div><div class="tech-item-desc">Responsive design system</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tech-group-title">Backend &amp; Infrastructure</div>
+          <div class="tech-item">
+            <div class="tech-item-icon icon-amber">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div><div class="tech-item-name">NestJS 11</div><div class="tech-item-desc">Modular REST API framework</div></div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-item-icon icon-blue">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div><div class="tech-item-name">PostgreSQL 16 + Prisma</div><div class="tech-item-desc">Relational DB with type-safe ORM</div></div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-item-icon icon-red">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <div><div class="tech-item-name">JWT + bcrypt + Docker</div><div class="tech-item-desc">Auth security &amp; containerized deploy</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Functional Requirements -->
+  <div class="slide" data-slide="4" data-speaker="Azadur">
     <div class="slide-content">
       <span class="slide-tag">Requirements</span>
       <h2>Functional Requirements</h2>
@@ -554,8 +714,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 5: Non-Functional Requirements -->
-  <div class="slide" data-slide="4">
+  <!-- SLIDE 6: Non-Functional Requirements -->
+  <div class="slide" data-slide="5" data-speaker="Rakib">
     <div class="slide-content">
       <span class="slide-tag">Quality Attributes</span>
       <h2>Non-Functional Requirements</h2>
@@ -606,8 +766,61 @@
     </div>
   </div>
 
-  <!-- SLIDE 6: Use Case Diagram -->
-  <div class="slide" data-slide="5">
+  <!-- SLIDE 7: How It Works -->
+  <div class="slide" data-slide="6" data-speaker="Rakib">
+    <div class="slide-content">
+      <span class="slide-tag">User Flow</span>
+      <h2>How It Works</h2>
+      <p class="subtitle" style="text-align:center; max-width:560px;">
+        A simple 6-step workflow from employee onboarding to attendance reporting
+      </p>
+      <div class="steps-flow">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <h4>Create Account</h4>
+          <p>Admin adds employee and assigns a shift</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <h4>Login</h4>
+          <p>Employee logs in with email and password</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <h4>Check In</h4>
+          <p>Click check-in when arriving at work</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <h4>Check Out</h4>
+          <p>Click check-out when leaving work</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-item">
+          <div class="step-number">5</div>
+          <h4>Leave Request</h4>
+          <p>Submit leave, admin approves or rejects</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-item">
+          <div class="step-number">6</div>
+          <h4>Reports</h4>
+          <p>Dashboard shows real-time analytics</p>
+        </div>
+      </div>
+      <div style="margin-top:28px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px 24px; max-width:700px; text-align:center;">
+        <p style="font-size:0.85rem; color:var(--text-muted);">
+          <strong style="color:var(--success);">Status is calculated automatically</strong> based on shift time and grace minutes — Present, Late, Half-Day, or Absent.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Use Case Diagram -->
+  <div class="slide" data-slide="7" data-speaker="Rakib">
     <div class="slide-content" style="max-width:900px;">
       <span class="slide-tag">Diagrams</span>
       <h2>Use Case Diagram</h2>
@@ -615,13 +828,13 @@
         Actor interactions with system functions across all roles
       </p>
       <div style="width:100%; height:430px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#fff;">
-        <embed src="attendance-use-case.drawio.pdf" type="application/pdf" width="100%" height="100%" style="border:none;" />
+        <embed src="docs/attendance-use-case.drawio.pdf" type="application/pdf" width="100%" height="100%" style="border:none;" />
       </div>
     </div>
   </div>
 
-  <!-- SLIDE 7: Class Diagram -->
-  <div class="slide" data-slide="6">
+  <!-- SLIDE 9: Class Diagram -->
+  <div class="slide" data-slide="8" data-speaker="Rakib">
     <div class="slide-content" style="max-width:900px;">
       <span class="slide-tag">Diagrams</span>
       <h2>Class Diagram</h2>
@@ -629,13 +842,13 @@
         Domain models, attributes, and relationships between entities
       </p>
       <div style="width:100%; height:430px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#fff;">
-        <embed src="attendance-class-diagram.drawio.pdf" type="application/pdf" width="100%" height="100%" style="border:none;" />
+        <embed src="docs/attendance-class-diagram.drawio.pdf" type="application/pdf" width="100%" height="100%" style="border:none;" />
       </div>
     </div>
   </div>
 
-  <!-- SLIDE 8: Screenshots — Dashboard & Employees -->
-  <div class="slide" data-slide="7">
+  <!-- SLIDE 10: Screenshots — Dashboard & Employees -->
+  <div class="slide" data-slide="9" data-speaker="Rakib">
     <div class="slide-content" style="max-width:1000px;">
       <span class="slide-tag">Application Screens</span>
       <h2>Dashboard &amp; Employees</h2>
@@ -652,8 +865,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 9: Screenshots — Attendance & Leave -->
-  <div class="slide" data-slide="8">
+  <!-- SLIDE 11: Screenshots — Attendance & Leave -->
+  <div class="slide" data-slide="10" data-speaker="Rakib">
     <div class="slide-content" style="max-width:1000px;">
       <span class="slide-tag">Application Screens</span>
       <h2>Attendance &amp; Leave</h2>
@@ -670,8 +883,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 10: Screenshots — Shift & Reports -->
-  <div class="slide" data-slide="9">
+  <!-- SLIDE 12: Screenshots — Shift & Reports -->
+  <div class="slide" data-slide="11" data-speaker="Aduri">
     <div class="slide-content" style="max-width:1000px;">
       <span class="slide-tag">Application Screens</span>
       <h2>Shifts &amp; Reports</h2>
@@ -688,8 +901,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 11: Testing -->
-  <div class="slide" data-slide="10">
+  <!-- SLIDE 13: Testing -->
+  <div class="slide" data-slide="12" data-speaker="Aduri">
     <div class="slide-content">
       <span class="slide-tag">Testing</span>
       <h2>Testing Strategy</h2>
@@ -725,8 +938,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 12: Challenges -->
-  <div class="slide" data-slide="11">
+  <!-- SLIDE 14: Challenges -->
+  <div class="slide" data-slide="13" data-speaker="Aduri">
     <div class="slide-content">
       <span class="slide-tag">Challenges</span>
       <h2>Challenges &amp; Solutions</h2>
@@ -765,8 +978,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 13: Links & Demo -->
-  <div class="slide" data-slide="12">
+  <!-- SLIDE 15: Links & Demo -->
+  <div class="slide" data-slide="14" data-speaker="Aduri">
     <div class="slide-content">
       <span class="slide-tag">Demo &amp; Source</span>
       <h2>Live Demo &amp; Source Code</h2>
@@ -800,8 +1013,8 @@
     </div>
   </div>
 
-  <!-- SLIDE 14: Conclusion -->
-  <div class="slide" data-slide="13">
+  <!-- SLIDE 16: Conclusion -->
+  <div class="slide" data-slide="15" data-speaker="All">
     <div class="slide-content">
       <span class="slide-tag">Conclusion</span>
       <h2>Conclusion &amp; Future Work</h2>
@@ -856,6 +1069,7 @@
 
   const progressBar = document.getElementById('progressBar');
   const slideCounter = document.getElementById('slideCounter');
+  const speakerBadge = document.getElementById('speakerBadge');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
   const dotsContainer = document.getElementById('navDots');
@@ -876,6 +1090,10 @@
     prevBtn.disabled = current === 0;
     nextBtn.disabled = current === total - 1;
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
+
+    // Update speaker badge
+    var speaker = slides[current].getAttribute('data-speaker') || 'All';
+    speakerBadge.textContent = 'Speaker: ' + speaker;
   }
 
   function goTo(index) {
