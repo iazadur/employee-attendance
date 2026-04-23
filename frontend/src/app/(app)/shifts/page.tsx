@@ -54,7 +54,7 @@ export default function ShiftsPage() {
   const shifts = useListShiftsQuery();
   const [createShift, createState] = useCreateShiftMutation();
   const [updateShift, updateState] = useUpdateShiftMutation();
-  const [deleteShift, deleteState] = useDeleteShiftMutation();
+  const [deleteShift] = useDeleteShiftMutation();
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingShift, setEditingShift] = useState<Shift | null>(null);
