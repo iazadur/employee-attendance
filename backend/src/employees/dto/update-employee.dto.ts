@@ -25,4 +25,3 @@ export class UpdateEmployeeDto {
   @IsString()
   profilePhoto?: string | null;
 }
-

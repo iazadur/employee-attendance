@@ -13,4 +13,3 @@ export class AttendanceQueryDto {
   @IsDateString()
   dateTo?: string;
 }
-

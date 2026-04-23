@@ -9,6 +9,7 @@ export declare class AttendanceController {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        shiftId: string | null;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -17,12 +18,17 @@ export declare class AttendanceController {
         source: import(".prisma/client").$Enums.AttendanceSource;
         isManualOverride: boolean;
         overriddenById: string | null;
+        shiftName: string | null;
+        shiftStartTime: string | null;
+        shiftEndTime: string | null;
+        shiftGraceMinutes: number | null;
     }>;
     checkOut(req: Request): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        shiftId: string | null;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -31,12 +37,17 @@ export declare class AttendanceController {
         source: import(".prisma/client").$Enums.AttendanceSource;
         isManualOverride: boolean;
         overriddenById: string | null;
+        shiftName: string | null;
+        shiftStartTime: string | null;
+        shiftEndTime: string | null;
+        shiftGraceMinutes: number | null;
     }>;
     list(req: Request, query: AttendanceQueryDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        shiftId: string | null;
         employeeId: string;
         date: Date;
         checkIn: Date | null;
@@ -45,5 +56,9 @@ export declare class AttendanceController {
         source: import(".prisma/client").$Enums.AttendanceSource;
         isManualOverride: boolean;
         overriddenById: string | null;
+        shiftName: string | null;
+        shiftStartTime: string | null;
+        shiftEndTime: string | null;
+        shiftGraceMinutes: number | null;
     }[]>;
 }

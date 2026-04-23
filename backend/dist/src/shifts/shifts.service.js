@@ -36,8 +36,13 @@ let ShiftsService = class ShiftsService {
                 data: input,
             });
         }
-        catch {
-            throw new common_1.NotFoundException('Shift not found');
+        catch (error) {
+            if (error instanceof Error &&
+                'code' in error &&
+                error.code === 'P2025') {
+                throw new common_1.NotFoundException('Shift not found');
+            }
+            throw error;
         }
     }
     async remove(id) {
@@ -45,8 +50,14 @@ let ShiftsService = class ShiftsService {
             await this.prisma.shift.delete({ where: { id } });
             return { ok: true };
         }
-        catch {
-            throw new common_1.NotFoundException('Shift not found');
+        catch (error) {
+            if (error.code === 'P2025') {
+                throw new common_1.NotFoundException('Shift not found');
+            }
+            if (error.code === 'P2003' || error.code === 'P2002') {
+                throw new common_1.ConflictException('Cannot delete shift: it is assigned to one or more employees');
+            }
+            throw error;
         }
     }
 };

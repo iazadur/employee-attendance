@@ -3,7 +3,7 @@ import { ReportsService } from './reports.service';
 export declare class ReportsController {
     private readonly reports;
     constructor(reports: ReportsService);
-    today(): Promise<{
+    today(shiftId?: string): Promise<{
         totalEmployees: number;
         today: {
             present: number;
@@ -13,7 +13,7 @@ export declare class ReportsController {
         };
         pendingLeaves: number;
     }>;
-    monthly(req: Request, employeeId: string | undefined, year: string, month: string): Promise<{
+    monthly(req: Request, employeeId: string | undefined, shiftId: string | undefined, year: string, month: string): Promise<{
         employeeId: string;
         year: number;
         month: number;

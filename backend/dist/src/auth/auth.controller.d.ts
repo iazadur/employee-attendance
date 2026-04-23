@@ -2,6 +2,14 @@ import type { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+type AuthenticatedRequest = Request & {
+    user: {
+        id: string;
+        email: string;
+        name: string;
+        role: string;
+    };
+};
 export declare class AuthController {
     private readonly auth;
     private readonly config;
@@ -14,10 +22,16 @@ export declare class AuthController {
             role: import(".prisma/client").$Enums.UserRole;
         };
     }>;
-    logout(res: Response): Promise<{
+    logout(res: Response): {
         ok: boolean;
-    }>;
-    me(req: Request): Promise<{
-        user: any;
-    }>;
+    };
+    me(req: AuthenticatedRequest): {
+        user: {
+            id: string;
+            email: string;
+            name: string;
+            role: string;
+        };
+    };
 }
+export {};

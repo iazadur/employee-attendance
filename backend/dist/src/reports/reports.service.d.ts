@@ -4,7 +4,9 @@ export declare class ReportsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     private startOfDayUtc;
-    todayKpis(): Promise<{
+    todayKpis(params?: {
+        shiftId?: string;
+    }): Promise<{
         totalEmployees: number;
         today: {
             present: number;
@@ -32,6 +34,7 @@ export declare class ReportsService {
         queryEmployeeId?: string;
         year: number;
         month: number;
+        shiftId?: string;
     }): Promise<{
         employeeId: string;
         year: number;

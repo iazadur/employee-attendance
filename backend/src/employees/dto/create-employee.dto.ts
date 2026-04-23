@@ -1,4 +1,10 @@
-import { IsDateString, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateEmployeeDto {
   @IsEmail()
@@ -27,4 +33,3 @@ export class CreateEmployeeDto {
   @IsString()
   shiftId?: string;
 }
-

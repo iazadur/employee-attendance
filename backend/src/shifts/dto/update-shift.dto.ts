@@ -1,4 +1,9 @@
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsTimeFormat,
+  IsEndTimeAfterStart,
+  IsValidWorkingDays,
+} from '../validators/shift-validators';
 
 export class UpdateShiftDto {
   @IsOptional()
@@ -7,14 +12,18 @@ export class UpdateShiftDto {
 
   @IsOptional()
   @IsString()
+  @IsTimeFormat()
   startTime?: string;
 
   @IsOptional()
   @IsString()
+  @IsTimeFormat()
+  @IsEndTimeAfterStart('startTime')
   endTime?: string;
 
   @IsOptional()
   @IsString()
+  @IsValidWorkingDays()
   workingDays?: string;
 
   @IsOptional()
@@ -26,4 +35,3 @@ export class UpdateShiftDto {
   @IsString()
   description?: string | null;
 }
-

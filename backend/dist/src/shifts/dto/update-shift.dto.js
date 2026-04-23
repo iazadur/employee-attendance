@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateShiftDto = void 0;
 const class_validator_1 = require("class-validator");
+const shift_validators_1 = require("../validators/shift-validators");
 class UpdateShiftDto {
     name;
     startTime;
@@ -28,16 +29,20 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, shift_validators_1.IsTimeFormat)(),
     __metadata("design:type", String)
 ], UpdateShiftDto.prototype, "startTime", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, shift_validators_1.IsTimeFormat)(),
+    (0, shift_validators_1.IsEndTimeAfterStart)('startTime'),
     __metadata("design:type", String)
 ], UpdateShiftDto.prototype, "endTime", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, shift_validators_1.IsValidWorkingDays)(),
     __metadata("design:type", String)
 ], UpdateShiftDto.prototype, "workingDays", void 0);
 __decorate([

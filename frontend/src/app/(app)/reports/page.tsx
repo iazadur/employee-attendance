@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMeQuery } from "@/store/authApi";
 import { useListEmployeesQuery } from "@/store/employeesApi";
+import { useListShiftsQuery } from "@/store/shiftsApi";
 import { useMonthlyQuery, useTodayKpisQuery } from "@/store/reportsApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AttendanceStatusPie } from "@/components/charts/AttendanceStatusPie";
@@ -23,7 +24,10 @@ export default function ReportsPage() {
   const role = me.data?.user.role;
   const canSeeKpis = role === "ADMIN" || role === "MANAGER";
 
-  const kpis = useTodayKpisQuery(undefined, { skip: !canSeeKpis });
+  const shifts = useListShiftsQuery();
+  const [shiftId, setShiftId] = useState<string>("");
+
+  const kpis = useTodayKpisQuery(shiftId ? { shiftId } : {}, { skip: !canSeeKpis });
 
   const now = useMemo(() => new Date(), []);
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -35,18 +39,26 @@ export default function ReportsPage() {
     { skip: !canSeeKpis },
   );
 
+  // Filter employees by selected shift
+  const filteredEmployees = useMemo(() => {
+    if (!shiftId) return employees.data?.items ?? [];
+    return (employees.data?.items ?? []).filter((e) => e.shiftId === shiftId);
+  }, [employees.data?.items, shiftId]);
+
   const monthly = useMonthlyQuery(
     canSeeKpis
       ? {
           year,
           month,
           employeeId: employeeId || undefined,
+          shiftId: shiftId || undefined,
         }
       : {
           year,
           month,
         },
   );
+
   const todayData = [
     { label: "Present", value: kpis.data?.today.present ?? 0 },
     { label: "Late", value: kpis.data?.today.late ?? 0 },
@@ -92,6 +104,28 @@ export default function ReportsPage() {
         </div>
       ) : null}
 
+      {/* Shift filter */}
+      {canSeeKpis ? (
+        <div className="grid w-full gap-3 md:grid-cols-4">
+          <div className="grid gap-2">
+            <Label>Shift</Label>
+            <Select value={shiftId} onValueChange={(v) => setShiftId(v ?? "")}>
+              <SelectTrigger className="w-full md:w-72">
+                <SelectValue placeholder="All shifts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All shifts</SelectItem>
+                {(shifts.data ?? []).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ) : null}
+
       {canSeeKpis ? (
         <ChartSectionCard
           title="Today performance trend"
@@ -118,11 +152,11 @@ export default function ReportsPage() {
                   onValueChange={(v) => setEmployeeId(v ?? "")}
                 >
                   <SelectTrigger className="w-full md:w-72">
-                    <SelectValue placeholder="All employees" />
+                    <SelectValue placeholder="All employees (shift aggregate)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All employees</SelectItem>
-                    {(employees.data?.items ?? []).map((e) => (
+                    <SelectItem value="">All employees (shift aggregate)</SelectItem>
+                    {filteredEmployees.map((e) => (
                       <SelectItem key={e.id} value={e.id}>
                         {e.user.name} ({e.employeeCode})
                       </SelectItem>
@@ -170,4 +204,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-

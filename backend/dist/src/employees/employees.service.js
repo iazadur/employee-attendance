@@ -109,7 +109,9 @@ let EmployeesService = class EmployeesService {
                 orderBy: { createdAt: 'desc' },
                 include: {
                     user: { select: { id: true, email: true, name: true, role: true } },
-                    shift: { select: { id: true, name: true, startTime: true, endTime: true } },
+                    shift: {
+                        select: { id: true, name: true, startTime: true, endTime: true },
+                    },
                 },
             }),
             this.prisma.employee.count({ where }),
@@ -140,7 +142,10 @@ let EmployeesService = class EmployeesService {
                     shiftId: input.shiftId === null ? null : input.shiftId,
                     profilePhoto: input.profilePhoto === null ? null : input.profilePhoto,
                 },
-                include: { user: { select: { id: true, email: true, name: true, role: true } }, shift: true },
+                include: {
+                    user: { select: { id: true, email: true, name: true, role: true } },
+                    shift: true,
+                },
             });
         }
         catch {
