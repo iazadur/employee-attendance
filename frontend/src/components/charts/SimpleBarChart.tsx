@@ -26,14 +26,14 @@ export function SimpleBarChart({
 
   if (!hasData) {
     return (
-      <div className="flex h-[240px] items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-[240px] min-w-0 items-center justify-center text-sm text-muted-foreground">
         No data
       </div>
     );
   }
 
   return (
-    <div style={{ height }} className="w-full">
+    <div style={{ height, minHeight: height }} className="w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <CartesianGrid vertical={false} stroke="var(--border)" />
