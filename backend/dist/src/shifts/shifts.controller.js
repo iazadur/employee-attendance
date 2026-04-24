@@ -26,14 +26,14 @@ let ShiftsController = class ShiftsController {
     constructor(shifts) {
         this.shifts = shifts;
     }
-    create(dto) {
-        return this.shifts.create(dto);
-    }
     list() {
         return this.shifts.list();
     }
     get(id) {
         return this.shifts.get(id);
+    }
+    create(dto) {
+        return this.shifts.create(dto);
     }
     update(id, dto) {
         return this.shifts.update(id, dto);
@@ -44,6 +44,21 @@ let ShiftsController = class ShiftsController {
 };
 exports.ShiftsController = ShiftsController;
 __decorate([
+    (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN, client_1.UserRole.MANAGER),
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ShiftsController.prototype, "list", null);
+__decorate([
+    (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN, client_1.UserRole.MANAGER),
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ShiftsController.prototype, "get", null);
+__decorate([
     (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
@@ -51,21 +66,6 @@ __decorate([
     __metadata("design:paramtypes", [create_shift_dto_1.CreateShiftDto]),
     __metadata("design:returntype", void 0)
 ], ShiftsController.prototype, "create", null);
-__decorate([
-    (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN),
-    (0, common_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ShiftsController.prototype, "list", null);
-__decorate([
-    (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN),
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ShiftsController.prototype, "get", null);
 __decorate([
     (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN),
     (0, common_1.Patch)(':id'),

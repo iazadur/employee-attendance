@@ -11,7 +11,9 @@ export class LeaveService {
   constructor(private readonly prisma: PrismaService) {}
 
   private startOfDayUtc(d: Date) {
-    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    return new Date(
+      Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+    );
   }
 
   private daysBetweenInclusive(start: Date, end: Date) {
@@ -56,7 +58,9 @@ export class LeaveService {
   }
 
   async listForEmployee(userId: string) {
-    const employee = await this.prisma.employee.findUnique({ where: { userId } });
+    const employee = await this.prisma.employee.findUnique({
+      where: { userId },
+    });
     if (!employee) throw new NotFoundException('Employee profile not found');
 
     return this.prisma.leaveRequest.findMany({
@@ -66,7 +70,10 @@ export class LeaveService {
   }
 
   async listAll(requester: { id: string; role: UserRole }) {
-    if (requester.role !== UserRole.ADMIN && requester.role !== UserRole.MANAGER)
+    if (
+      requester.role !== UserRole.ADMIN &&
+      requester.role !== UserRole.MANAGER
+    )
       throw new BadRequestException('Not allowed');
 
     return this.prisma.leaveRequest.findMany({
@@ -85,7 +92,10 @@ export class LeaveService {
     status: LeaveStatus;
     adminComment?: string;
   }) {
-    if (params.requester.role !== UserRole.ADMIN && params.requester.role !== UserRole.MANAGER)
+    if (
+      params.requester.role !== UserRole.ADMIN &&
+      params.requester.role !== UserRole.MANAGER
+    )
       throw new BadRequestException('Not allowed');
 
     if (

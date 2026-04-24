@@ -55,7 +55,9 @@ let LeaveService = class LeaveService {
         });
     }
     async listForEmployee(userId) {
-        const employee = await this.prisma.employee.findUnique({ where: { userId } });
+        const employee = await this.prisma.employee.findUnique({
+            where: { userId },
+        });
         if (!employee)
             throw new common_1.NotFoundException('Employee profile not found');
         return this.prisma.leaveRequest.findMany({
@@ -64,7 +66,8 @@ let LeaveService = class LeaveService {
         });
     }
     async listAll(requester) {
-        if (requester.role !== client_1.UserRole.ADMIN && requester.role !== client_1.UserRole.MANAGER)
+        if (requester.role !== client_1.UserRole.ADMIN &&
+            requester.role !== client_1.UserRole.MANAGER)
             throw new common_1.BadRequestException('Not allowed');
         return this.prisma.leaveRequest.findMany({
             orderBy: { createdAt: 'desc' },
@@ -76,7 +79,8 @@ let LeaveService = class LeaveService {
         });
     }
     async review(params) {
-        if (params.requester.role !== client_1.UserRole.ADMIN && params.requester.role !== client_1.UserRole.MANAGER)
+        if (params.requester.role !== client_1.UserRole.ADMIN &&
+            params.requester.role !== client_1.UserRole.MANAGER)
             throw new common_1.BadRequestException('Not allowed');
         if (params.status !== client_1.LeaveStatus.APPROVED &&
             params.status !== client_1.LeaveStatus.REJECTED)

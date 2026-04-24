@@ -11,7 +11,9 @@ export class AttendanceService {
   constructor(private readonly prisma: PrismaService) {}
 
   private startOfDayUtc(d: Date) {
-    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    return new Date(
+      Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+    );
   }
 
   private parseHHmm(value: string): number {
@@ -30,7 +32,6 @@ export class AttendanceService {
       include: { shift: true },
     });
     if (!employee) throw new NotFoundException('Employee profile not found');
-    if (!employee.shift) throw new BadRequestException('No shift assigned');
 
     const now = new Date();
     const date = this.startOfDayUtc(now);
@@ -40,14 +41,18 @@ export class AttendanceService {
     });
     if (existing?.checkIn) throw new BadRequestException('Already checked in');
 
-    const shiftStartMin = this.parseHHmm(employee.shift.startTime);
-    const grace = employee.shift.graceMinutes ?? 0;
-    const nowMin = this.minutesSinceStartOfDayUtc(now);
-
-    const status =
-      Number.isFinite(shiftStartMin) && nowMin > shiftStartMin + grace
-        ? AttendanceStatus.LATE
-        : AttendanceStatus.PRESENT;
+    // Compute status based on shift if available
+    let status: AttendanceStatus = AttendanceStatus.PRESENT;
+    let shiftStartMin: number | undefined;
+    let grace = 0;
+    if (employee.shift) {
+      shiftStartMin = this.parseHHmm(employee.shift.startTime);
+      grace = employee.shift.graceMinutes ?? 0;
+      const nowMin = this.minutesSinceStartOfDayUtc(now);
+      if (Number.isFinite(shiftStartMin) && nowMin > shiftStartMin + grace) {
+        status = AttendanceStatus.LATE;
+      }
+    }
 
     const record = await this.prisma.attendanceRecord.upsert({
       where: { employeeId_date: { employeeId: employee.id, date } },
@@ -57,8 +62,18 @@ export class AttendanceService {
         checkIn: now,
         status,
         source: AttendanceSource.WEB,
+        // Shift snapshot
+        shiftId: employee.shift?.id ?? null,
+        shiftName: employee.shift?.name ?? null,
+        shiftStartTime: employee.shift?.startTime ?? null,
+        shiftEndTime: employee.shift?.endTime ?? null,
+        shiftGraceMinutes: employee.shift?.graceMinutes ?? null,
       },
-      update: { checkIn: now, status, source: AttendanceSource.WEB },
+      update: {
+        checkIn: now,
+        status,
+        source: AttendanceSource.WEB,
+      },
     });
 
     return record;
@@ -70,7 +85,6 @@ export class AttendanceService {
       include: { shift: true },
     });
     if (!employee) throw new NotFoundException('Employee profile not found');
-    if (!employee.shift) throw new BadRequestException('No shift assigned');
 
     const now = new Date();
     const date = this.startOfDayUtc(now);
@@ -86,17 +100,21 @@ export class AttendanceService {
       Math.round((now.getTime() - existing.checkIn.getTime()) / 60000),
     );
 
-    const shiftStartMin = this.parseHHmm(employee.shift.startTime);
-    const shiftEndMin = this.parseHHmm(employee.shift.endTime);
-    const shiftDuration =
-      Number.isFinite(shiftStartMin) && Number.isFinite(shiftEndMin)
-        ? Math.max(0, shiftEndMin - shiftStartMin)
-        : null;
+    // Determine half-day based on shift if available; otherwise keep existing status
+    let status = existing.status;
+    if (employee.shift) {
+      const shiftStartMin = this.parseHHmm(employee.shift.startTime);
+      const shiftEndMin = this.parseHHmm(employee.shift.endTime);
+      const shiftDuration =
+        Number.isFinite(shiftStartMin) && Number.isFinite(shiftEndMin)
+          ? Math.max(0, shiftEndMin - shiftStartMin)
+          : null;
 
-    const halfDay =
-      shiftDuration !== null ? totalMinutes < Math.floor(shiftDuration / 2) : false;
-
-    const status = halfDay ? AttendanceStatus.HALF_DAY : existing.status;
+      if (shiftDuration !== null) {
+        const halfDay = totalMinutes < Math.floor(shiftDuration / 2);
+        status = halfDay ? AttendanceStatus.HALF_DAY : existing.status;
+      }
+    }
 
     return this.prisma.attendanceRecord.update({
       where: { id: existing.id },
@@ -137,8 +155,10 @@ export class AttendanceService {
     }
     if (params.dateFrom || params.dateTo) {
       where.date = {};
-      if (params.dateFrom) where.date.gte = this.startOfDayUtc(new Date(params.dateFrom));
-      if (params.dateTo) where.date.lte = this.startOfDayUtc(new Date(params.dateTo));
+      if (params.dateFrom)
+        where.date.gte = this.startOfDayUtc(new Date(params.dateFrom));
+      if (params.dateTo)
+        where.date.lte = this.startOfDayUtc(new Date(params.dateTo));
     }
 
     return this.prisma.attendanceRecord.findMany({

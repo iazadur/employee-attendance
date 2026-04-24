@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
@@ -53,11 +57,7 @@ export class EmployeesService {
     });
   }
 
-  async listEmployees(params: {
-    q?: string;
-    skip?: number;
-    take?: number;
-  }) {
+  async listEmployees(params: { q?: string; skip?: number; take?: number }) {
     const skip = params.skip ?? 0;
     const take = params.take ?? 20;
     const q = params.q?.trim();
@@ -82,7 +82,9 @@ export class EmployeesService {
         orderBy: { createdAt: 'desc' },
         include: {
           user: { select: { id: true, email: true, name: true, role: true } },
-          shift: { select: { id: true, name: true, startTime: true, endTime: true } },
+          shift: {
+            select: { id: true, name: true, startTime: true, endTime: true },
+          },
         },
       }),
       this.prisma.employee.count({ where }),
@@ -115,7 +117,10 @@ export class EmployeesService {
           shiftId: input.shiftId === null ? null : input.shiftId,
           profilePhoto: input.profilePhoto === null ? null : input.profilePhoto,
         },
-        include: { user: { select: { id: true, email: true, name: true, role: true } }, shift: true },
+        include: {
+          user: { select: { id: true, email: true, name: true, role: true } },
+          shift: true,
+        },
       });
     } catch {
       throw new NotFoundException('Employee not found');

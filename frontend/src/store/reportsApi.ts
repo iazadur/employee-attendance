@@ -15,12 +15,12 @@ export type MonthlyReport = {
 
 export const reportsApi = api.injectEndpoints({
   endpoints: (build) => ({
-    todayKpis: build.query<TodayKpis, void>({
-      query: () => "/reports/today",
+    todayKpis: build.query<TodayKpis, { shiftId?: string }>({
+      query: (params) => ({ url: "/reports/today", params }),
     }),
     monthly: build.query<
       MonthlyReport,
-      { year: number; month: number; employeeId?: string }
+      { year: number; month: number; employeeId?: string; shiftId?: string }
     >({
       query: (params) => ({ url: "/reports/monthly", params }),
     }),

@@ -24,10 +24,10 @@ let ReportsController = class ReportsController {
     constructor(reports) {
         this.reports = reports;
     }
-    today() {
-        return this.reports.todayKpis();
+    today(shiftId) {
+        return this.reports.todayKpis({ shiftId });
     }
-    monthly(req, employeeId, year, month) {
+    monthly(req, employeeId, shiftId, year, month) {
         const user = req.user;
         const y = Number(year);
         const m = Number(month);
@@ -36,6 +36,7 @@ let ReportsController = class ReportsController {
             queryEmployeeId: employeeId,
             year: y,
             month: m,
+            shiftId,
         });
     }
 };
@@ -43,8 +44,9 @@ exports.ReportsController = ReportsController;
 __decorate([
     (0, roles_decorator_1.Roles)(client_1.UserRole.ADMIN, client_1.UserRole.MANAGER),
     (0, common_1.Get)('today'),
+    __param(0, (0, common_1.Query)('shiftId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ReportsController.prototype, "today", null);
 __decorate([
@@ -52,10 +54,11 @@ __decorate([
     (0, common_1.Get)('monthly'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)('employeeId')),
-    __param(2, (0, common_1.Query)('year')),
-    __param(3, (0, common_1.Query)('month')),
+    __param(2, (0, common_1.Query)('shiftId')),
+    __param(3, (0, common_1.Query)('year')),
+    __param(4, (0, common_1.Query)('month')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, String, String]),
     __metadata("design:returntype", void 0)
 ], ReportsController.prototype, "monthly", null);
 exports.ReportsController = ReportsController = __decorate([

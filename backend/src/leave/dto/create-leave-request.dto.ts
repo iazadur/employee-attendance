@@ -15,4 +15,3 @@ export class CreateLeaveRequestDto {
   @MinLength(3)
   reason!: string;
 }
-

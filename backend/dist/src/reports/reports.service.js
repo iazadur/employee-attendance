@@ -21,16 +21,33 @@ let ReportsService = class ReportsService {
     startOfDayUtc(d) {
         return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
     }
-    async todayKpis() {
+    async todayKpis(params = {}) {
         const today = this.startOfDayUtc(new Date());
-        const [totalEmployees, todayRecords, pendingLeaves] = await Promise.all([
-            this.prisma.employee.count(),
-            this.prisma.attendanceRecord.findMany({
-                where: { date: today },
-                select: { status: true },
+        const employeeWhere = {};
+        if (params.shiftId) {
+            employeeWhere.shiftId = params.shiftId;
+        }
+        const [totalEmployees, employees] = await Promise.all([
+            this.prisma.employee.count({ where: employeeWhere }),
+            this.prisma.employee.findMany({
+                where: employeeWhere,
+                select: { id: true },
             }),
-            this.prisma.leaveRequest.count({ where: { status: 'PENDING' } }),
         ]);
+        const employeeIds = employees.map((e) => e.id);
+        const todayRecords = await this.prisma.attendanceRecord.findMany({
+            where: {
+                date: today,
+                ...(employeeIds.length > 0 ? { employeeId: { in: employeeIds } } : {}),
+            },
+            select: { status: true },
+        });
+        const pendingLeaves = await this.prisma.leaveRequest.count({
+            where: {
+                status: 'PENDING',
+                ...(employeeIds.length > 0 ? { employeeId: { in: employeeIds } } : {}),
+            },
+        });
         const present = todayRecords.filter((r) => r.status === 'PRESENT').length;
         const late = todayRecords.filter((r) => r.status === 'LATE').length;
         const halfDay = todayRecords.filter((r) => r.status === 'HALF_DAY').length;
@@ -51,10 +68,15 @@ let ReportsService = class ReportsService {
             acc[r.status] = (acc[r.status] ?? 0) + 1;
             return acc;
         }, {});
-        return { employeeId: params.employeeId, year: params.year, month: params.month, summary };
+        return {
+            employeeId: params.employeeId,
+            year: params.year,
+            month: params.month,
+            summary,
+        };
     }
     async monthlyForRequester(params) {
-        const { requester, queryEmployeeId, year, month } = params;
+        const { requester, queryEmployeeId, year, month, shiftId } = params;
         if (requester.role === client_1.UserRole.EMPLOYEE) {
             const emp = await this.prisma.employee.findUnique({
                 where: { userId: requester.id },
@@ -70,11 +92,32 @@ let ReportsService = class ReportsService {
                 month,
             });
         }
+        if (shiftId) {
+            const employees = await this.prisma.employee.findMany({
+                where: { shiftId },
+                select: { id: true },
+            });
+            const employeeIds = employees.map((e) => e.id);
+            const from = new Date(Date.UTC(year, month - 1, 1));
+            const to = new Date(Date.UTC(year, month, 0));
+            const records = await this.prisma.attendanceRecord.findMany({
+                where: {
+                    employeeId: { in: employeeIds },
+                    date: { gte: from, lte: to },
+                },
+                select: { status: true },
+            });
+            const summary = records.reduce((acc, r) => {
+                acc[r.status] = (acc[r.status] ?? 0) + 1;
+                return acc;
+            }, {});
+            return { employeeId: `shift-${shiftId}`, year, month, summary };
+        }
         const emp = await this.prisma.employee.findUnique({
             where: { userId: requester.id },
         });
         if (!emp) {
-            throw new common_1.BadRequestException('employeeId query parameter is required for users without an employee profile');
+            throw new common_1.BadRequestException('employeeId or shiftId query parameter is required for users without an employee profile');
         }
         return this.monthlyEmployeeSummary({ employeeId: emp.id, year, month });
     }

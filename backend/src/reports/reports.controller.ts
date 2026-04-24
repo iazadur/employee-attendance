@@ -13,8 +13,8 @@ export class ReportsController {
 
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Get('today')
-  today() {
-    return this.reports.todayKpis();
+  today(@Query('shiftId') shiftId?: string) {
+    return this.reports.todayKpis({ shiftId });
   }
 
   @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
@@ -22,6 +22,7 @@ export class ReportsController {
   monthly(
     @Req() req: Request,
     @Query('employeeId') employeeId: string | undefined,
+    @Query('shiftId') shiftId: string | undefined,
     @Query('year') year: string,
     @Query('month') month: string,
   ) {
@@ -34,6 +35,7 @@ export class ReportsController {
       queryEmployeeId: employeeId,
       year: y,
       month: m,
+      shiftId,
     });
   }
 }

@@ -21,22 +21,22 @@ import { UpdateShiftDto } from './dto/update-shift.dto';
 export class ShiftsController {
   constructor(private readonly shifts: ShiftsService) {}
 
-  @Roles(UserRole.ADMIN)
-  @Post()
-  create(@Body() dto: CreateShiftDto) {
-    return this.shifts.create(dto);
-  }
-
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Get()
   list() {
     return this.shifts.list();
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Get(':id')
   get(@Param('id') id: string) {
     return this.shifts.get(id);
+  }
+
+  @Roles(UserRole.ADMIN)
+  @Post()
+  create(@Body() dto: CreateShiftDto) {
+    return this.shifts.create(dto);
   }
 
   @Roles(UserRole.ADMIN)

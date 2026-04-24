@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -36,7 +45,11 @@ export class LeaveController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Patch(':id/review')
-  review(@Req() req: Request, @Param('id') id: string, @Body() dto: ReviewLeaveDto) {
+  review(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: ReviewLeaveDto,
+  ) {
     const user = (req as any).user as { id: string; role: any };
     return this.leave.review({
       requester: { id: user.id, role: user.role },

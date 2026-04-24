@@ -64,7 +64,7 @@ model Employee {
 
 model Shift {
   id           String   @id @default(cuid())
-  name         String
+  name         String   @unique
   startTime    String
   endTime      String
   workingDays  String
@@ -106,6 +106,13 @@ model AttendanceRecord {
   isManualOverride Boolean @default(false)
   overriddenById   String?
   overriddenBy     User?   @relation("AttendanceOverriddenBy", fields: [overriddenById], references: [id])
+
+  // Shift snapshot at check-in for historical accuracy
+  shiftId          String?
+  shiftName        String?
+  shiftStartTime   String?
+  shiftEndTime     String?
+  shiftGraceMinutes Int?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

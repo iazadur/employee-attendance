@@ -20,7 +20,7 @@ export default function DashboardPage() {
 
   const role = me.data?.user.role;
   const canSeeKpis = role === "ADMIN" || role === "MANAGER";
-  const kpis = useTodayKpisQuery(undefined, { skip: !canSeeKpis });
+   const kpis = useTodayKpisQuery({}, { skip: !canSeeKpis });
 
   const now = useMemo(() => new Date(), []);
   const [month, setMonth] = useState(now.getMonth() + 1);
