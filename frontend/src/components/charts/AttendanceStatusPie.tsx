@@ -27,15 +27,15 @@ export function AttendanceStatusPie(props: {
 
   if (!entries.length) {
     return (
-      <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-[260px] min-w-0 items-center justify-center text-sm text-muted-foreground">
         No data
       </div>
     );
   }
 
   return (
-    <div className="w-full">
-      <div className="h-[260px]">
+    <div className="w-full min-w-0">
+      <div className="h-[260px] min-h-[260px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

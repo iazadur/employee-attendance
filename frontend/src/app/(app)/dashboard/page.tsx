@@ -1,9 +1,10 @@
 "use client";
 
+import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import { useMeQuery } from "@/store/authApi";
 import { Button } from "@/components/ui/button";
-import { useCheckInMutation, useCheckOutMutation } from "@/store/attendanceApi";
+import { useCheckInMutation, useCheckOutMutation, useTodayAttendanceQuery } from "@/store/attendanceApi";
 import { toast } from "sonner";
 import { useMonthlyQuery, useTodayKpisQuery } from "@/store/reportsApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,12 @@ export default function DashboardPage() {
   const me = useMeQuery();
   const [checkIn, checkInState] = useCheckInMutation();
   const [checkOut, checkOutState] = useCheckOutMutation();
-
+  const today = new Date();
+  const todayDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+  const { data: todayAttendance } = useTodayAttendanceQuery(
+    { date: todayDate },
+    { skip: !me.data?.user.id }
+  );
   const role = me.data?.user.role;
   const canSeeKpis = role === "ADMIN" || role === "MANAGER";
    const kpis = useTodayKpisQuery({}, { skip: !canSeeKpis });
@@ -48,6 +54,46 @@ export default function DashboardPage() {
     .filter(([, value]) => typeof value === "number" && value > 0)
     .map(([label, value]) => ({ label, value }));
 
+  // Determine button states based on attendance record
+  const isCheckedIn = Boolean(todayAttendance?.checkIn);
+  const isCheckedOut = Boolean(todayAttendance?.checkOut);
+
+  const getApiErrorMessage = (error: unknown) => {
+    if (typeof error === "object" && error !== null && "data" in error) {
+      const data = (error as { data?: { message?: unknown } }).data;
+      if (Array.isArray(data?.message)) {
+        return data.message.filter((item) => typeof item === "string").join(", ");
+      }
+      if (typeof data?.message === "string") {
+        return data.message;
+      }
+    }
+    return "Operation failed";
+  };
+
+  // Helper function to get status badge
+  const getStatusBadge = (status: string | null | undefined) => {
+    if (!status) return "No record";
+    switch (status) {
+      case "PRESENT":
+        return "On Time";
+      case "LATE":
+        return "Late";
+      case "HALF_DAY":
+        return "Half Day";
+      case "ABSENT":
+        return "Absent";
+      default:
+        return status;
+    }
+  };
+
+  const formatAttendanceTime = (value: string | null) => {
+    if (!value) return null;
+
+    return dayjs(value).format("hh:mm A");
+  };
+
   return (
     <div className="w-full space-y-6 px-1 py-1 md:px-2">
       <PageSectionHeader
@@ -57,43 +103,103 @@ export default function DashboardPage() {
       />
 
       {me.data?.user.role === "EMPLOYEE" ? (
-        <div className="rounded-2xl border bg-card p-4 shadow-sm">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div className="rounded-2xl border bg-card p-4 shadow-sm transition-all duration-300 ease-out">
+          <div className="flex items-center justify-between gap-3 border-b pb-3 transition-colors duration-300">
             <div>
-              <div className="text-sm font-medium">Today</div>
-              <div className="text-sm text-muted-foreground">
-                Check in/out to record your attendance
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Today
+              </div>
+              <div className="text-sm font-semibold text-foreground">
+                Attendance snapshot
               </div>
             </div>
-            <div className="flex gap-3">
-              <Button
-                disabled={checkInState.isLoading}
-                onClick={async () => {
-                  try {
-                    await checkIn().unwrap();
-                    toast.success("Checked in");
-                  } catch {
-                    toast.error("Check-in failed");
-                  }
-                }}
-              >
-                {checkInState.isLoading ? "Checking in..." : "Check in"}
-              </Button>
-              <Button
-                variant="secondary"
-                disabled={checkOutState.isLoading}
-                onClick={async () => {
-                  try {
-                    await checkOut().unwrap();
-                    toast.success("Checked out");
-                  } catch {
-                    toast.error("Check-out failed");
-                  }
-                }}
-              >
-                {checkOutState.isLoading ? "Checking out..." : "Check out"}
-              </Button>
+            <div className="rounded-full border bg-white px-3 py-1 text-xs font-medium text-muted-foreground transition-all duration-300">
+              {todayAttendance ? getStatusBadge(todayAttendance.status) : "No record yet"}
             </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border bg-white p-3 transition-all duration-300 hover:-translate-y-0.5">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  ⏰
+                </span>
+                Check-in
+              </div>
+              <div className="mt-2 text-sm font-semibold text-foreground">
+                {formatAttendanceTime(todayAttendance?.checkIn ?? null) ? (
+                  <span className="font-mono">
+                    {formatAttendanceTime(todayAttendance?.checkIn ?? null)}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Not checked in</span>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-white p-3 transition-all duration-300 hover:-translate-y-0.5">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/40 text-foreground">
+                  ⏰
+                </span>
+                Check-out
+              </div>
+              <div className="mt-2 text-sm font-semibold text-foreground">
+                {formatAttendanceTime(todayAttendance?.checkOut ?? null) ? (
+                  <span className="font-mono">
+                    {formatAttendanceTime(todayAttendance?.checkOut ?? null)}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Not checked out</span>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-white p-3 transition-all duration-300 hover:-translate-y-0.5">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-foreground">
+                  📊
+                </span>
+                Status
+              </div>
+              <div className="mt-2 text-sm font-semibold text-foreground">
+                {todayAttendance ? getStatusBadge(todayAttendance.status) : "Pending"}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={isCheckedIn || checkInState.isLoading || checkOutState.isLoading}
+              onClick={async () => {
+                try {
+                  await checkIn().unwrap();
+                  toast.success("Checked in successfully");
+                } catch (error) {
+                  toast.error(getApiErrorMessage(error));
+                }
+              }}
+            >
+              {isCheckedIn ? "Checked in" : checkInState.isLoading ? "Checking in..." : "Check In"}
+            </Button>
+            <Button
+              className="w-full"
+              variant="secondary"
+              size="lg"
+              disabled={!isCheckedIn || isCheckedOut || checkInState.isLoading || checkOutState.isLoading}
+              onClick={async () => {
+                try {
+                  await checkOut().unwrap();
+                  toast.success("Checked out successfully");
+                } catch (error) {
+                  toast.error(getApiErrorMessage(error));
+                }
+              }}
+            >
+              {isCheckedOut ? "Completed" : checkOutState.isLoading ? "Checking out..." : "Check Out"}
+            </Button>
           </div>
         </div>
       ) : null}

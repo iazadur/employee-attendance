@@ -48,6 +48,17 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #3f4347;
@@ -126,5 +137,16 @@
   }
   html {
     @apply font-sans;
+  }
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    cursor: pointer;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    cursor: pointer;
   }
 }
